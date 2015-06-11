@@ -5,7 +5,6 @@
 
 #include <lg_fw_diag_communication.h>
 #include <lg_diag_testmode.h>
-#include <mach/qdsp5v2/audio_def.h>
 #include <linux/delay.h>
 
 #ifndef SKW_TEST
@@ -817,16 +816,9 @@ void* LGF_TestModeSleepMode(test_mode_req_type * pReq, DIAG_TEST_MODE_F_rsp_type
 		case SLEEP_MODE_ON:
 #ifdef CONFIG_PM
 #ifdef CONFIG_EARLYSUSPEND
-#ifdef CONFIG_LGE_SUPPORT_MINIOS
-			state = PM_SUSPEND_MEM;
-			if (state == PM_SUSPEND_ON || valid_state(state)) {
-				request_suspend_state(state);
-			}
-#else
 			state = get_suspend_state();
 			if (state == PM_SUSPEND_ON)
 				LGF_SendKey(KEY_POWER);
-#endif /* CONFIG_LGE_SUPPORT_MINIOS */
 #else
 			error = pm_suspend(state);
 #endif /* CONFIG_EARLYSUSPEND */
@@ -836,16 +828,9 @@ void* LGF_TestModeSleepMode(test_mode_req_type * pReq, DIAG_TEST_MODE_F_rsp_type
 		case FLIGHT_MODE_OFF:
 #ifdef CONFIG_PM
 #ifdef CONFIG_EARLYSUSPEND
-#ifdef CONFIG_LGE_SUPPORT_MINIOS
-			state = PM_SUSPEND_ON;
-			if (state == PM_SUSPEND_ON || valid_state(state)) {
-				request_suspend_state(state);
-			}
-#else
 			state = get_suspend_state();
 			if (state != PM_SUSPEND_ON)
 				LGF_SendKey(KEY_POWER);
-#endif /* CONFIG_LGE_SUPPORT_MINIOS */
 #else
 			error = pm_suspend(state);
 #endif /* CONFIG_EARLYSUSPEND */
