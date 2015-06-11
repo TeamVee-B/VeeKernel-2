@@ -291,8 +291,7 @@ set_gpio_fail:
 gpio_fail:
 	if (!(machine_is_msm7627a_qrd1() || machine_is_msm7627a_evb() ||
 	    machine_is_msm8625_evb() || machine_is_msm8625_evt() ||
-	    machine_is_msm7627a_qrd3() || machine_is_msm8625_qrd7() ||
-	    machine_is_msm8625q_evbd() || machine_is_qrd_skud_prime()))
+	    machine_is_msm7627a_qrd3() || machine_is_msm8625_qrd7()))
 			gpio_free(gpio_wlan_sys_rest_en);
 qrd_gpio_fail:
 	/* GPIO_WLAN_3V3_EN is only required for the QRD7627a */
@@ -376,8 +375,7 @@ set_gpio_fail:
 gpio_fail:
 	if (!(machine_is_msm7627a_qrd1() || machine_is_msm7627a_evb() ||
 	    machine_is_msm8625_evb() || machine_is_msm8625_evt() ||
-	    machine_is_msm7627a_qrd3() || machine_is_msm8625_qrd7() ||
-	    machine_is_msm8625q_evbd() || machine_is_qrd_skud_prime()))
+	    machine_is_msm7627a_qrd3() || machine_is_msm8625_qrd7()))
 			gpio_free(gpio_wlan_sys_rest_en);
 qrd_gpio_fail:
 	/* GPIO_WLAN_3V3_EN is only required for the QRD7627a */
