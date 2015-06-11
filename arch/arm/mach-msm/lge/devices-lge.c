@@ -250,7 +250,7 @@ void __init lge_add_boot_mode_devices(void)
 #endif
 #endif
 
-#if defined(CONFIG_ANDROID_RAM_CONSOLE) && defined(CONFIG_LGE_HANDLE_PANIC)
+#ifdef CONFIG_LGE_HANDLE_PANIC
 static struct resource crash_log_resource[] = {
 	{
 		.name = "crash_log",
@@ -275,12 +275,12 @@ void __init lge_add_panic_handler_devices(void)
 	res->start = bank->start + bank->size + LGE_RAM_CONSOLE_SIZE;
 	res->end = res->start + LGE_CRASH_LOG_SIZE - 1;
 
-	//printk(KERN_INFO "CRASH LOG START ADDR : 0x%x\n", res->start);
-	//printk(KERN_INFO "CRASH LOG END ADDR   : 0x%x\n", res->end);
+	printk(KERN_INFO "CRASH LOG START ADDR : 0x%x\n", res->start);
+	printk(KERN_INFO "CRASH LOG END ADDR   : 0x%x\n", res->end);
 
 	platform_device_register(&panic_handler_device);
 }
-#endif /*CONFIG_ANDROID_RAM_CONSOLE && CONFIG_LGE_HANDLE_PANIC*/
+#endif
 
 // LGE_CHANGE_S, narasimha.chikka@lge.com,Add pm device
 static struct platform_device lge_pm_device = {
