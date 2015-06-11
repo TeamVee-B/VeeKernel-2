@@ -30,11 +30,6 @@ enum lge_fboot_mode_type {
 	first_boot,
 	second_boot
 };
-//LGE_CHANGE_E FTM boot mode
-#if 0
-#define PMEM_KERNEL_EBI1_SIZE	0x3A000
-#define MSM_PMEM_AUDIO_SIZE	0x5B000
-#endif
 
 #ifdef CONFIG_LGE_HW_REVISION
 /* board revision information */
@@ -560,10 +555,6 @@ struct msm_panel_ilitek_pdata {
 };
 
 void __init msm_msm7x2x_allocate_memory_regions(void);
-#if 0
-void __init msm7x27a_reserve(void);
-#endif
-/* lge API functions to register i2c devices */
 
 /* LGE_CHANGE_S: murali.ramaiah@lge.com [2011-09-22]  */
 #ifdef CONFIG_LGE_POWER_ON_STATUS_PATCH
