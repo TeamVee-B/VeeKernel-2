@@ -5,6 +5,10 @@
 # credits to Rashed for the base of zip making
 # credits to the internet for filling in else where
 
+# You need to download https://github.com/TeamVee/android_prebuilt_toolchains
+# Clone in the same folder as the kernel
+
+
 # Function Start
 
 inchoice() {
@@ -30,11 +34,25 @@ inchoice
 devicechoice
 ccachevariable
 echo ""
-echo "Script says: Choose the place of the toolchain"; sleep .5
+echo "Caio99BR says: Checking if you have TeamVee Prebuilt Toolchains"; sleep 2
 if [ -d ../android_prebuilt_toolchains ]; then
+echo "Script says: Choose the toolchain"; sleep .5
 echo "Google GCC - 1) 4.7   | 2) 4.8"; sleep .5
-echo "Linaro GCC - 3) 4.6.4 | 4) 4.7.4 | 5) 4.8.4"; sleep .5
-echo "or any key to Choose the place"; sleep .5
+echo "Linaro GCC - 3) 4.6.4 | 4) 4.7.4"; sleep .5
+echo "Linaro GCC - 5) 4.8.4 | 6) 4.9.3"; sleep .5
+toolchainchoice
+else
+echo "Caio99BR says: You don't have TeamVee Prebuilt Toolchains"; sleep .5
+echo ""
+echo "Script says: Please specify a location"; sleep 1
+echo "Script says: and the prefix of the chosen toolchain at the end"; sleep 1
+echo "Caio99BR says: GCC 4.6 ex. ../arm-eabi-4.6/bin/arm-eabi-"; sleep 2
+toolchainplace
+fi
+echo "$CROSS_COMPILE"; sleep .5
+}
+
+toolchainchoice() {
 read -p "Choice: " -n 1 -s toolchain
 case "$toolchain" in
 	1 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-eabi-4.7/bin/arm-eabi-";;
@@ -42,21 +60,12 @@ case "$toolchain" in
 	3 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-unknown-linux-gnueabi-linaro_4.6.4-2013.05/bin/arm-unknown-linux-gnueabi-";;
 	4 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-unknown-linux-gnueabi-linaro_4.7.4-2013.12/bin/arm-unknown-linux-gnueabi-";;
 	5 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-linux-gnueabi-linaro_4.8.4-2014.11/bin/arm-linux-gnueabi-";;
-	* ) toolchainplace;;
+	6 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-cortex-linux-gnueabi-linaro_4.9.3-2015.03/bin/arm-cortex-linux-gnueabi-";;
+	* ) echo "$toolchain - This option is not valid"; sleep 2; toolchainchoice;;
 esac
-else
-echo "Caio99BR says: You need TeamVee Prebuilt Toolchains"; sleep .5
-echo "Caio99BR says: To choose more faster"; sleep .5
-toolchainplace
-fi
-echo "$CROSS_COMPILE"; sleep .5
 }
 
 toolchainplace() {
-echo ""
-echo "Script says: Please specify a location"; sleep 1
-echo "Script says: and the prefix of the chosen toolchain at the end"; sleep 1
-echo "Caio99BR says: GCC 4.6 ex. ../arm-eabi-4.6/bin/arm-eabi-"; sleep 2
 read -p "Place: " -s CROSS_COMPILE
 }
 
@@ -191,7 +200,9 @@ echo "Disabled!"
 
 # End - Function
 
-scriptrev=10
+# Start
+
+scriptrev=11
 
 location=.
 custom_kernel=VeeKernel
@@ -199,8 +210,6 @@ version=Release
 
 cd $location
 export ARCH=arm
-
-# Start
 
 echo ""
 echo "Caio99BR says: This is an open source script, feel free to use and share it."; sleep .5
