@@ -5,6 +5,8 @@
 # credits to Rashed for the base of zip making
 # credits to the internet for filling in else where
 
+# Function Start
+
 inchoice() {
 echo ""
 echo "Script says: Choose to which you will build"; sleep .5
@@ -20,11 +22,13 @@ case "$choice" in
 	* ) echo "$choice - This option is not valid"; sleep 2; devicechoice;;
 esac
 echo "$choice - $target $serie $variant"; sleep .5
+make $defconfig &> /dev/null
 }
 
 mainprocess() {
 inchoice
 devicechoice
+ccachevariable
 echo ""
 echo "Script says: Choose the place of the toolchain"; sleep .5
 if [ -d ../android_prebuilt_toolchains ]; then
@@ -131,7 +135,6 @@ buildprocess() {
 echo "Building..."
 sleep 1
 echo
-make $defconfig &> /dev/null
 make -j `cat /proc/cpuinfo | grep "^processor" | wc -l` "$@"
 if [ -f arch/arm/boot/zImage ]; then
 	coping
@@ -148,11 +151,51 @@ if [ -f arch/arm/boot/zImage ]; then
 fi
 }
 
-scriptrev=9
+ccachevariable() {
+ccachecheck=`cat .config | grep "# CONFIG_CCACHE is not set"`
+echo ""
+if [ "$ccachecheck" == "# CONFIG_CCACHE is not set" ]; then
+echo "Script Says: CCache Disabled"
+echo "Script says: You want to enable CCache?"
+read -p "Script says: Y for Enable, or Any key for continue: " -n 1 -s ccachec
+case $ccachec in
+	Y) ccacheenable;;
+	y) ccacheenable;;
+	*) resume;;
+esac
+else
+echo "Script Says: CCache Enabled"
+echo "Script says: You want to disable CCache?"
+read -p "Script says: N for Disable or Any key for continue: " -n 1 -s ccachec
+case $ccachec in
+	N) ccachedisable;;
+	n) ccachedisable;;
+	*) resume;;
+esac
+fi
+}
+
+ccacheenable() {
+sed 's/# CONFIG_CCACHE is not set/CONFIG_CCACHE=y/' .config > .config-temp
+rm .config
+mv .config-temp .config
+echo "Enabled!"
+}
+
+ccachedisable() {
+sed 's/CONFIG_CCACHE=y/# CONFIG_CCACHE is not set/' .config > .config-temp
+rm .config
+mv .config-temp .config
+echo "Disabled!"
+}
+
+# End - Function
+
+scriptrev=10
 
 location=.
 custom_kernel=VeeKernel
-version=Local
+version=Release
 
 cd $location
 export ARCH=arm
