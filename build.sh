@@ -8,7 +8,6 @@
 # You need to download https://github.com/TeamVee/android_prebuilt_toolchains
 # Clone in the same folder as the kernel
 
-
 # Function Start
 
 inchoice() {
@@ -188,6 +187,7 @@ ccacheenable() {
 sed 's/# CONFIG_CCACHE is not set/CONFIG_CCACHE=y/' .config > .config-temp
 rm .config
 mv .config-temp .config
+export USE_CCACHE=1
 echo "Enabled!"
 }
 
@@ -202,7 +202,9 @@ echo "Disabled!"
 
 # Start
 
-scriptrev=11
+clear
+
+scriptrev=11.1
 
 location=.
 custom_kernel=VeeKernel
