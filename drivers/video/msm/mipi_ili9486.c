@@ -435,11 +435,6 @@ static long ili9486_reg_init_ext(void)
 }
 #endif
 
-/*LGE_CHANGE_S,hyungjoon.jeon,13-02-06, for M4 lcd backlight timning code*/
-#if defined(CONFIG_MACH_MSM7X25A_M4)
-extern int lcd_on_completed;
-#endif
-
 static int mipi_ili9486_lcd_on(struct platform_device *pdev)
 {
 	struct msm_fb_data_type *mfd;
@@ -565,12 +560,6 @@ static int mipi_ili9486_lcd_on(struct platform_device *pdev)
 #ifdef CONFIG_LGE_LCD_ESD_DETECTION
 	lcd_on_off = 1;
 #endif
-
-/*LGE_CHANGE_S,hyungjoon.jeon,13-02-06, for M4 lcd backlight timning code*/
-#if defined(CONFIG_MACH_MSM7X25A_M4)
- lcd_on_completed = 1;
-#endif
-
 	return 0;
 }
 

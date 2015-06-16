@@ -28,7 +28,7 @@ unsigned lge_pm_low_vbatt_notify(void);
 /*LGE_CHANGE_S: seunhang.lee@lge.com 14/01/2013:Factory Reset with AT Command*/
 /* LGE_CHANGE hyungjoon.jeon@lge.com 12/02/13 */ 
 //#if defined(CONFIG_MACH_MSM7X27A_U0)
-#if defined(CONFIG_MACH_MSM7X27A_U0) || defined(CONFIG_MACH_MSM7X25A_M4)
+#if defined(CONFIG_MACH_MSM7X27A_U0)
 unsigned lge_get_nv_frststatus(void);
 void lge_set_nv_frststatus(unsigned int flag);
 #endif

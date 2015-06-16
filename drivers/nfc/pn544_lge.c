@@ -481,7 +481,7 @@ static const struct file_operations pn544_dev_fops = {
 	.unlocked_ioctl = pn544_dev_unlocked_ioctl,
 };
 
-#if defined(CONFIG_MACH_MSM7X27A_U0) || defined(CONFIG_MACH_MSM7X25A_M4)
+#if defined(CONFIG_MACH_MSM7X27A_U0)
 static int pn544_probe(struct i2c_client *client,
 		const struct i2c_device_id *id)
 {

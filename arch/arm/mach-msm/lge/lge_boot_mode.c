@@ -104,7 +104,7 @@ static int update_apps_boot_mode(void)
 }
 
 //LGE_CHANGE_S FTM boot mode
-#if (defined (CONFIG_MACH_MSM7X25A_V3) && !defined (CONFIG_MACH_MSM7X25A_M4)) || defined (CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined (CONFIG_MACH_MSM7X25A_V3) || defined (CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
 extern unsigned lge_nv_manual_f(int val);
 #endif
 //LGE_CHANGE_E FTM boot mode
@@ -114,7 +114,7 @@ static int update_lge_boot_mode(void)
 // 2012-11-05 Sonchiwon(chiwon.son@lge.com) [V3/V7][Hidden.Menu] HiddenMenu > Settings > Battery > Charging Bypass Boot [START]
 	int test_mode, factory_cable, charger, charging_bypass;
 //LGE_CHANGE_S FTM boot mode
-#if (defined (CONFIG_MACH_MSM7X25A_V3) && !defined (CONFIG_MACH_MSM7X25A_M4)) || defined (CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined (CONFIG_MACH_MSM7X25A_V3) || defined (CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
 	int first_boot_check = 0;
 #endif
 
@@ -133,7 +133,7 @@ static int update_lge_boot_mode(void)
 	boot_reason &= 0xFF;
 
 //LGE_CHANGE_S FTM boot mode
-#if (defined (CONFIG_MACH_MSM7X25A_V3) && !defined (CONFIG_MACH_MSM7X25A_M4)) || defined (CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined (CONFIG_MACH_MSM7X25A_V3) || defined (CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
 	if (lge_get_fboot_mode() == first_boot) {
 		lge_nv_manual_f(1);
 		first_boot_check = 1;
@@ -170,7 +170,7 @@ static int update_lge_boot_mode(void)
 		boot_mode = LGE_BOOT_MODE_CHARGER;
 	} else if (test_mode) {
 //LGE_CHANGE_S FTM boot mode
-#if (defined (CONFIG_MACH_MSM7X25A_V3) && !defined (CONFIG_MACH_MSM7X25A_M4)) || defined (CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined (CONFIG_MACH_MSM7X25A_V3) || defined (CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
 		if (first_boot_check == 1) {
 		        printk(KERN_INFO "[FTM] first boot is set --> FTM boot\n");
 			boot_mode = LGE_BOOT_MODE_FIRST;
@@ -195,7 +195,7 @@ static int update_lge_boot_mode(void)
 /*LGE_CHANGE_S: seunhang.lee@lge.com 14/01/2013:Factory Reset with AT Command*/
 /* LGE_CHANGE hyungjoon.jeon@lge.com 12/02/13 */
 //#if defined(CONFIG_MACH_MSM7X27A_U0)
-#if defined(CONFIG_MACH_MSM7X27A_U0) || defined(CONFIG_MACH_MSM7X25A_M4)
+#if defined(CONFIG_MACH_MSM7X27A_U0)
 static ssize_t msm_nv_frststatus_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	unsigned char frststatus;
@@ -279,7 +279,7 @@ static DEVICE_ATTR(boot_mode, 0400, boot_mode_show, NULL);
 /*LGE_CHANGE_S: seunhang.lee@lge.com 14/01/2013:Factory Reset with AT Command*/
 /* LGE_CHANGE hyungjoon.jeon@lge.com 12/02/13 */
 //#if defined(CONFIG_MACH_MSM7X27A_U0)
-#if defined(CONFIG_MACH_MSM7X27A_U0) || defined(CONFIG_MACH_MSM7X25A_M4)
+#if defined(CONFIG_MACH_MSM7X27A_U0)
 static DEVICE_ATTR(frststatus, 0660, msm_nv_frststatus_show, msm_nv_frststatus_store);
 #endif
 /*LGE_CHANGE_E: seunhang.lee@lge.com 14/01/2013:Factory Reset with AT Command*/	
@@ -303,7 +303,7 @@ static struct attribute* dev_attrs_bootmode_info[] = {
 /*LGE_CHANGE_S: seunhang.lee@lge.com 14/01/2013:Factory Reset with AT Command*/
 /* LGE_CHANGE hyungjoon.jeon@lge.com 12/02/13 */	
 //#if defined(CONFIG_MACH_MSM7X27A_U0)
-#if defined(CONFIG_MACH_MSM7X27A_U0) || defined(CONFIG_MACH_MSM7X25A_M4)
+#if defined(CONFIG_MACH_MSM7X27A_U0)
     &dev_attr_frststatus.attr,
 #endif
 /*LGE_CHANGE_E: seunhang.lee@lge.com 14/01/2013:Factory Reset with AT Command*/	

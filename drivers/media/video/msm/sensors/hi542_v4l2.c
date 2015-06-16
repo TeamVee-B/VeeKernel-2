@@ -548,17 +548,10 @@ static struct msm_camera_i2c_reg_conf hi542_recommend_settings[] = {
 	{0x02c7, 0xdb}, //24}, //dark2 NCP voltage
 	
 	{0x061A, 0x01}, /* man_spec_edof_ctrl_edof_fw_spare_0 Gain x7 */
-#ifdef CONFIG_MACH_MSM7X25A_M4
-	{0x061B, 0x02},//20120510 0x04},//03},ryu 20120416 /* man_spec_edof_ctrl_edof_fw_spare_0 Gain x7 */
-	{0x061C, 0x00}, /* man_spec_edof_ctrl_edof_fw_spare_0 Gain x7 */
-	{0x061D, 0x00}, /* man_spec_edof_ctrl_edof_fw_spare_0 Gain x7 */
-	{0x061E, 0x01},//20120510 0x00}, /* man_spec_edof_ctrl_edof_fw_spare_0 Gain x7 */
-#else
 	{0x061B, 0x01}, //0509 modified 3 -> 2 -> 1  amplitude 400mv -> 420mv
 	{0x061C, 0x00}, /* man_spec_edof_ctrl_edof_fw_spare_0 Gain x7 */
 	{0x061D, 0x03}, //0428 modified jun	only u0 not M4, M4 is {0x061D, 0x00} 
 	{0x061E, 0x04}, //0428 modified jun only u0 not M4, M4 is {0x061E, 0x00}
-#endif
 	{0x061F, 0x03}, /* ryu 20120416 man_spec_edof_ctrl_edof_fw_spare_0 Gain x7 */
 	{0x0613, 0x01}, /* man_spec_edof_ctrl_edof_fw_spare_0 Gain x7 */
 	{0x0615, 0x01}, /* man_spec_edof_ctrl_edof_fw_spare_0 Gain x7 */

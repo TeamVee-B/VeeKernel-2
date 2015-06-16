@@ -1509,14 +1509,14 @@ void input_event(struct input_dev *dev, unsigned int type, unsigned int code, in
 void input_inject_event(struct input_handle *handle, unsigned int type, unsigned int code, int value);
 
 #ifdef CONFIG_LGE_FACTORY
-#if defined(CONFIG_MACH_MSM7X25A_M4)||defined(CONFIG_MACH_MSM7X25A_V3) ||defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined(CONFIG_MACH_MSM7X25A_V3) ||defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
 	extern int LGF_TestModeGetDisableInputDevices(void);
 #endif
 #endif
 static inline void input_report_key(struct input_dev *dev, unsigned int code, int value)
 {
 #ifdef CONFIG_LGE_FACTORY
-#if defined(CONFIG_MACH_MSM7X25A_M4)||defined(CONFIG_MACH_MSM7X25A_V3) ||defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
+#if defined(CONFIG_MACH_MSM7X25A_V3) ||defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_V1)
 	if(LGF_TestModeGetDisableInputDevices()){
 		if(code==0x6b)
 #if defined(CONFIG_MACH_MSM8X25_V7)
@@ -1553,11 +1553,9 @@ static inline void input_report_rel(struct input_dev *dev, unsigned int code, in
 static inline void input_report_abs(struct input_dev *dev, unsigned int code, int value)
 {
 #ifdef CONFIG_LGE_FACTORY
-#if defined(CONFIG_MACH_MSM7X25A_M4)
 	if(LGF_TestModeGetDisableInputDevices())
 		;
 	else
-#endif		
 #endif
 	input_event(dev, EV_ABS, code, value);
 }
@@ -1580,11 +1578,9 @@ static inline void input_sync(struct input_dev *dev)
 static inline void input_mt_sync(struct input_dev *dev)
 {
 #ifdef CONFIG_LGE_FACTORY
-#if defined(CONFIG_MACH_MSM7X25A_M4)
 	if(LGF_TestModeGetDisableInputDevices())
 		;
 	else
-#endif		
 #endif
 	input_event(dev, EV_SYN, SYN_MT_REPORT, 0);
 }

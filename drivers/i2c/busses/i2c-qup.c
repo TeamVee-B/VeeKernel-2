@@ -133,13 +133,11 @@ static char const * const i2c_rsrcs[] = {"i2c_clk", "i2c_sda"};
 
 /* LGE_CHANGE_S : 2012-12-05 mjoh@lge.com I2C recover patch from ICS */
 #if !defined (CONFIG_MACH_MSM7X27A_U0) 
-#if !defined (CONFIG_MACH_MSM7X25A_M4)	// samjinjang I2C recover QCT patch 0514
 static struct gpiomux_setting recovery_config = {
 	.func = GPIOMUX_FUNC_GPIO,
 	.drv = GPIOMUX_DRV_8MA,
 	.pull = GPIOMUX_PULL_NONE,
 };
-#endif
 #endif
 /* LGE_CHANGE_E : 2012-12-05 mjoh@lge.com I2C recover patch from ICS */
 
@@ -674,7 +672,7 @@ qup_set_wr_mode(struct qup_i2c_dev *dev, int rem)
 }
 
 /* LGE_CHANGE_S : 2012-12-05 mjoh@lge.com I2C recover patch from ICS */
-#if defined (CONFIG_MACH_MSM7X27A_U0) || defined (CONFIG_MACH_MSM7X25A_M4)
+#if defined (CONFIG_MACH_MSM7X27A_U0)
 static int qup_i2c_recover_bus_busy(struct qup_i2c_dev *dev)	// samjinjang I2C recover QCT patch 0514
 #else	// original
 static void qup_i2c_recover_bus_busy(struct qup_i2c_dev *dev)
@@ -682,7 +680,7 @@ static void qup_i2c_recover_bus_busy(struct qup_i2c_dev *dev)
 /* LGE_CHANGE_E : 2012-12-05 mjoh@lge.com I2C recover patch from ICS */
 {
 /* LGE_CHANGE_S : 2012-12-05 mjoh@lge.com I2C recover patch from ICS */
-#if defined (CONFIG_MACH_MSM7X27A_U0) || defined (CONFIG_MACH_MSM7X25A_M4)
+#if defined (CONFIG_MACH_MSM7X27A_U0)
 	int i;
 //	uint32_t status = readl(dev->base + QUP_I2C_STATUS);
 	uint32_t status = readl_relaxed(dev->base + QUP_I2C_STATUS);
@@ -1030,7 +1028,7 @@ qup_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[], int num)
 					wait_for_completion_timeout(&complete,
 									HZ);
 /* LGE_CHANGE_S : 2012-12-05 mjoh@lge.com I2C recover patch from ICS */
-#if defined (CONFIG_MACH_MSM7X27A_U0) || defined (CONFIG_MACH_MSM7X25A_M4)
+#if defined (CONFIG_MACH_MSM7X27A_U0)
 					if (timeout)
 					{
 						dev_err(dev->dev,"1. timeout: status != BUS_ACTIVE || status == BUS_MASTER\n");
@@ -1043,7 +1041,7 @@ qup_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[], int num)
 /* LGE_CHANGE_E : 2012-12-05 mjoh@lge.com I2C recover patch from ICS */
 				}
 /* LGE_CHANGE_S : 2012-12-05 mjoh@lge.com I2C recover patch from ICS */
-#if defined (CONFIG_MACH_MSM7X27A_U0) || defined (CONFIG_MACH_MSM7X25A_M4)
+#if defined (CONFIG_MACH_MSM7X27A_U0)
 				disable_irq(dev->err_irq);
 				dev_err(dev->dev,"2. timeout: status == BUS_ACTIVE || status != BUS_MASTER\n");
 
@@ -1074,7 +1072,7 @@ qup_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[], int num)
 				goto out_err;
 			}
 /* LGE_CHANGE_S : 2012-12-05 mjoh@lge.com I2C recover patch from ICS */
-#if defined (CONFIG_MACH_MSM7X27A_U0) || defined (CONFIG_MACH_MSM7X25A_M4)
+#if defined (CONFIG_MACH_MSM7X27A_U0)
 handle_irq:		// samjinjang I2C recover QCT patch 0514
 			if (dev->err) {
 				if (dev->err > 0 &&

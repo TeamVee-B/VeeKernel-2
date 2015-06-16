@@ -678,7 +678,7 @@ int mmc_is_exception_event(struct mmc_card *card, unsigned int value)
 	 * AS IS 			- start bkops, and send HPI before sending general r/w command.
 	 *
 	 * disable bkops until final fix.
-	 * DO NOT add feature for v7/u0/m4/etc without firm reason on emmc spec or vendor confirm */
+	 * DO NOT add feature for v7/u0/etc without firm reason on emmc spec or vendor confirm */
 #if defined (CONFIG_MACH_MSM7X25A_V3) && defined (CONFIG_MACH_SAMSUNG_EMMC_V441_PLUS)
 //	pr_err("mmc_is_exception_event : %s - disable bkops for now.\n", mmc_hostname(card->host));
  	return 0;
@@ -695,12 +695,6 @@ int mmc_is_exception_event(struct mmc_card *card, unsigned int value)
 	 * Disable bkops. */
 
 #if defined (CONFIG_MACH_MSM8X25_V7)
- 	return 0;
-#endif
-
-	/* [LGE_CHANGE_S] hyungjoon.jeon@lge.com 
-	 * Disable bkops. */
-#if defined (CONFIG_MACH_MSM7X25A_M4)
  	return 0;
 #endif
 

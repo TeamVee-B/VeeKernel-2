@@ -164,7 +164,7 @@ void CheckHWRev(byte *pStr)
 {
 /* LGE_CHANGE_S : PCB_Revision
  * 2012-04-04, jikhwan.jeong@lge.com
- * [M4][PCB_Revision][Common] Modify PCB Revision.
+ * [PCB_Revision][Common] Modify PCB Revision.
  */
     char *rev_str[] = {"evb", "A", "B", "C", "D",
         "E", "F", "G", "1.0", "1.1", "1.2", "reserved"};
@@ -1827,14 +1827,7 @@ void* LGF_TestModeProximity(
 	char buf;
 #ifdef CONFIG_MACH_LGE
 	int p_cal;
-	/* LGE_CHANGE : 2013-02-08 (woden.lee@lge.com) Sensor sysfs for diag
-	M4 same sensor sysfs. but changed sysfs.
-	*/ 
-#ifdef CONFIG_MACH_MSM7X25A_M4
-	const char* prox_enable =  "/sys/devices/platform/i2c-gpio.6/i2c-6/6-0044/enable";
-	const char* prox_show= "/sys/devices/platform/i2c-gpio.6/i2c-6/6-0044/show";
-	const char* prox_calibration ="/sys/devices/platform/i2c-gpio.6/i2c-6/6-0044/run_calibration";
-#elif defined(CONFIG_MACH_MSM7X25A_V1) //jinseok.choi 2013-03-05 V1 Proxy Sensor Test
+#ifdef CONFIG_MACH_MSM7X25A_V1 //jinseok.choi 2013-03-05 V1 Proxy Sensor Test
 	const char* prox_enable =  "/sys/devices/platform/i2c-gpio.4/i2c-4/4-0039/enable";
 	const char* prox_show= "/sys/devices/platform/i2c-gpio.4/i2c-4/4-0039/show";
 	const char* prox_calibration ="/sys/devices/platform/i2c-gpio.4/i2c-4/4-0039/run_calibration";
@@ -1974,13 +1967,7 @@ void* LGF_TestModeProximityMFT(
 
 	char buf;
 #ifdef CONFIG_MACH_LGE
-/*LGE_CHANGE : 2013-02-08 (woden.lee@lge.com) Sensor sysfs for diag
-M4 same sensor sysfs. but changed sysfs
-*/
-#ifdef CONFIG_MACH_MSM7X25A_M4
-	const char* prox_enable =  "/sys/devices/platform/i2c-gpio.6/i2c-6/6-0044/enable";
-	const char* prox_show = "/sys/devices/platform/i2c-gpio.6/i2c-6/6-0044/show";
-#elif defined(CONFIG_MACH_MSM7X25A_V1) //jinseok.choi 2013-03-05 V1 Proxy Sensor Test
+#ifdef CONFIG_MACH_MSM7X25A_V1 //jinseok.choi 2013-03-05 V1 Proxy Sensor Test
 	const char* prox_enable =  "/sys/devices/platform/i2c-gpio.4/i2c-4/4-0039/enable";
 	const char* prox_show= "/sys/devices/platform/i2c-gpio.4/i2c-4/4-0039/show";
 #else 
@@ -2045,22 +2032,6 @@ void* LGF_TestModeAccelCal(
 
 	char buf_enable,buf_mode,buf_result;
 #ifdef CONFIG_MACH_LGE
-
-/*LGE_CHANGE : 2013-02-08 (woden.lee@lge.com) Sensor sysfs for diag
-M4 same sensor sysfs. but changed sysfs.
-*/
-#ifdef CONFIG_MACH_MSM7X25A_M4
-	const char* fast_x =  "/sys/class/input/input3/fast_calibration_x";
-	const char* fast_y =  "/sys/class/input/input3/fast_calibration_y";
-	const char* fast_z =  "/sys/class/input/input3/fast_calibration_z";
-	const char* eeprom_writing =  "/sys/class/input/input3/eeprom_writing";
-	const char* sensor_enable =  "/sys/class/input/input3/enable";
-	const char* sensor_mode =  "/sys/class/input/input3/mode";
-	const char* cal_result =  "/sys/class/input/input3/cal_result";
-#else
-/*LGE_CHANGE : 2012-10-08 Sanghun,Lee(eee3114.lee@lge.com) Sensor sysfs for diag
-V3&V7 same sensor sysfs. but changed sysfs.
-*/
 	const char* fast_x =  "/sys/class/input/input2/fast_calibration_x";
 	const char* fast_y =  "/sys/class/input/input2/fast_calibration_y";
 	const char* fast_z =  "/sys/class/input/input2/fast_calibration_z";
@@ -2068,7 +2039,6 @@ V3&V7 same sensor sysfs. but changed sysfs.
 	const char* sensor_enable =  "/sys/class/input/input2/enable";
 	const char* sensor_mode =  "/sys/class/input/input2/mode";
 	const char* cal_result =  "/sys/class/input/input2/cal_result";
-#endif	
 #else
 	const char* fast_x =  "/sys/class/input/input4/fast_calibration_x";
 	const char* fast_y =  "/sys/class/input/input4/fast_calibration_y";

@@ -298,7 +298,7 @@ unsigned lge_get_nv_qem(void)
 EXPORT_SYMBOL(lge_get_nv_qem);
 
 //LGE_CHANGE_S FTM boot mode
-#if (defined (CONFIG_MACH_MSM7X25A_V3) && !defined (CONFIG_MACH_MSM7X25A_M4)) || defined (CONFIG_MACH_MSM8X25_V7) || defined (CONFIG_MACH_MSM7X25A_V1)
+#if defined (CONFIG_MACH_MSM7X25A_V3) || defined (CONFIG_MACH_MSM8X25_V7) || defined (CONFIG_MACH_MSM7X25A_V1)
 unsigned lge_nv_manual_f(int val)
 {
 	int err;
@@ -450,7 +450,7 @@ unsigned lge_pm_low_vbatt_notify(void)
 EXPORT_SYMBOL(lge_pm_low_vbatt_notify);
 
 /* LGE_CHANGE_S  : adiyoung.lee, FTM Mode and ManualModeCkeckComplete on RPC, 2012-12-12 */
-#if !defined(CONFIG_MACH_MSM7X25A_M4) && (defined (CONFIG_MACH_MSM7X25A_V3) || defined (CONFIG_MACH_MSM8X25_V7) || defined (CONFIG_MACH_MSM7X25A_V1))
+#if defined (CONFIG_MACH_MSM7X25A_V3) || defined (CONFIG_MACH_MSM8X25_V7) || defined (CONFIG_MACH_MSM7X25A_V1)
 unsigned lge_aat_partial_f(int val)
 
 {
@@ -509,7 +509,7 @@ EXPORT_SYMBOL(lge_aat_partial_or_full_f);
 /*LGE_CHANGE_S: seunhang.lee@lge.com 14/01/2013:Factory Reset with AT Command*/
 /* LGE_CHANGE hyungjoon.jeon@lge.com 12/02/13 */
 //#if defined(CONFIG_MACH_MSM7X27A_U0)
-#if defined(CONFIG_MACH_MSM7X27A_U0) ||  defined(CONFIG_MACH_MSM7X25A_M4)
+#if defined(CONFIG_MACH_MSM7X27A_U0)
 #define CUSTOMER_CMD2_GET_FRSTSTATUS        0x20
 #define CUSTOMER_CMD2_SET_FRSTSTATUS        0x21
 #endif
@@ -520,7 +520,7 @@ EXPORT_SYMBOL(lge_aat_partial_or_full_f);
 
 /* LGE_CHANGE hyungjoon.jeon@lge.com 12/02/13 */
 //#if defined(CONFIG_MACH_MSM7X27A_U0)
-#if defined(CONFIG_MACH_MSM7X27A_U0) ||  defined(CONFIG_MACH_MSM7X25A_M4)
+#if defined(CONFIG_MACH_MSM7X27A_U0)
 unsigned lge_get_nv_frststatus(void) 
 {
 	int err;

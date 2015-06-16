@@ -26,7 +26,7 @@ static void msm_keypad_bl_led_set(struct led_classdev *led_cdev,
 	enum led_brightness value)
 {
 	
-#if defined(CONFIG_MACH_MSM7X27A_U0) || defined (CONFIG_MACH_MSM7X25A_M4)
+#if defined(CONFIG_MACH_MSM7X27A_U0)
 	int on_off;
 	int brightness;
 
@@ -37,63 +37,11 @@ static void msm_keypad_bl_led_set(struct led_classdev *led_cdev,
 	else
 		on_off = (int)PM_MPP__I_SINK__SWITCH_ENA;
 
-#if defined (CONFIG_MACH_MSM7X25A_M4)
-	brightness = PM_MPP__I_SINK__LEVEL_10mA;
-#else
 	brightness = PM_MPP__I_SINK__LEVEL_5mA;
-#endif	
-#if 0
-	switch (value) {
-	case 5:
-		brightness = PM_MPP__I_SINK__LEVEL_5mA;
-		break;
-	case 10:
-		brightness = PM_MPP__I_SINK__LEVEL_10mA;
-		break;
-	case 15:
-		brightness = PM_MPP__I_SINK__LEVEL_15mA;
-		break;
-	case 20:
-		brightness = PM_MPP__I_SINK__LEVEL_20mA;
-		break;
-	case 25:
-		brightness = PM_MPP__I_SINK__LEVEL_25mA;
-		break;
-	case 30:
-		brightness = PM_MPP__I_SINK__LEVEL_30mA;
-		break;
-	case 35:
-		brightness = PM_MPP__I_SINK__LEVEL_35mA;
-		break;
-	case 40:
-		brightness = PM_MPP__I_SINK__LEVEL_40mA;
-		break;
-	default:/* LGE_CHANGE  [yoonsoo.kim@lge.com]  20120223  : LED Current Reduce 25 -> 5mA */
-		brightness = PM_MPP__I_SINK__LEVEL_5mA;
-		break;
-	}
-	if (lge_bd_rev == LGE_REV_A) {
-	/* LED power(MPP pin) use
-	*REV.A
-	*EU	:MPP3, MPP4
-	*MPCS	:MPP4
-	*/
-	pmic_secure_mpp_config_i_sink((enum mpp_which)PM_MPP_4, brightness, (enum mpp_i_sink_switch)on_off);
-	} else if (lge_bd_rev >= LGE_REV_B) {
-	/* LED power(MPP pin) use
-	*REV.B
-	*EU	:MPP3
-	*MPCS	:MPP3
-	*/
-#endif
-#if defined (CONFIG_MACH_MSM7X25A_M4)
-	pmic_secure_mpp_config_i_sink((enum mpp_which)PM_MPP_7, brightness, (enum mpp_i_sink_switch)on_off);
-#else
-	pmic_secure_mpp_config_i_sink((enum mpp_which)PM_MPP_3, brightness, (enum mpp_i_sink_switch)on_off);
-#endif	
-//	}
 
-#else	//CONFIG_MACH_MSM7X27A_U0
+	pmic_secure_mpp_config_i_sink((enum mpp_which)PM_MPP_3, brightness, (enum mpp_i_sink_switch)on_off);
+
+#else
 	int ret;
 	ret = pmic_set_led_intensity(LED_KEYPAD, value / MAX_KEYPAD_BL_LEVEL);
 	if (ret)
@@ -102,7 +50,7 @@ static void msm_keypad_bl_led_set(struct led_classdev *led_cdev,
 }
 
 static struct led_classdev msm_kp_bl_led = {
-#if defined(CONFIG_MACH_MSM7X27A_U0) || defined (CONFIG_MACH_MSM7X25A_M4)
+#if defined(CONFIG_MACH_MSM7X27A_U0)
 	.name			= "button-backlight",
 #else
 	.name			= "keyboard-backlight",
@@ -120,13 +68,7 @@ static int msm_pmic_led_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "unable to register led class driver\n");
 		return rc;
 	}
-#if 0//defined(CONFIG_MACH_MSM7X27A_U0)
-	/* LGE_CHANGE_S: [murali.ramaiah@lge.com]: 2012-03-23,
-	Enabled key backlight leds till idle screen */
-	msm_keypad_bl_led_set(&msm_kp_bl_led, 5); /* 5mA Brightness */
-#else//CONFIG_MACH_MSM7X27A_U0
 	msm_keypad_bl_led_set(&msm_kp_bl_led, LED_OFF);
-#endif
 	return rc;
 }
 

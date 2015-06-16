@@ -191,17 +191,10 @@ static unsigned int debug = 0;
 module_param(debug, uint, 0644);
 
 /*LGE_CHANGE_S, youngbae.choi@lge.com, 13-01-03, for V7 lcd backlight timing code*/
-//#if defined(CONFIG_MACH_MSM8X25_V7)
-/*LGE_CHANGE_S, hyungjoon.jeon@lge.com 13-02-06, for M4 lcd backlight timing code */
-#if defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_M4)
+#if defined(CONFIG_MACH_MSM8X25_V7)
 int lcd_on_completed =0;
 #endif
 /*LGE_CHANGE_E, youngbae.choi@lge.com, 13-01-03, for V7 lcd backlight timing code*/
-
-/*LGE_CHANGE hyungjoon.jeon@lge.com 13-02-07 */
-#if defined(CONFIG_MACH_MSM7X25A_M4)
-static int bl_chargerlogo = 0;
-#endif
 
 int late_resume_value =0;
 int late_resume_count =0;
@@ -483,9 +476,7 @@ static void lm3530_wakeup(struct lm3530_driver_data *drvdata)
     gpio_set_value(124, 1); 
 	
 	/*LGE_CHANGE_S, youngbae.choi@lge.com, 13-01-03, for V7 lcd backlight timing code*/
-	//#if defined(CONFIG_MACH_MSM8X25_V7)
-	/*LGE_CHANGE_S, hyungjoon.jeon@lge.com, 13-02-06,for M4 lcd backlight timing code*/
-	#if defined(CONFIG_MACH_MSM8X25_V7) || defined(CONFIG_MACH_MSM7X25A_M4)
+	#if defined(CONFIG_MACH_MSM8X25_V7)
 	while(1){		
 		msleep(50);
 		if(lcd_on_completed == 1)
@@ -497,13 +488,6 @@ static void lm3530_wakeup(struct lm3530_driver_data *drvdata)
 	#endif
 	/*LGE_CHANGE_E, youngbae.choi@lge.com, 13-01-03, for V7 lcd backlight timing code*/	
 
-	//LGE_CHANGE, [hyungjoon.jeo@lge.com] , 2013-02-07
-	#if defined(CONFIG_MACH_MSM7X25A_M4)
-	//For backlight timing
-	if(bl_chargerlogo == 1){
-		msleep(200);
-	}
-	#endif
 	dprintk("operation mode is %s\n", (drvdata->mode == NORMAL_MODE) ? "normal_mode" : "alc_mode");
 
 	if (drvdata->state == POWEROFF_STATE) {
@@ -748,31 +732,9 @@ ssize_t lm3530_show_drvstat(struct device *dev, struct device_attribute *attr, c
 	return len;
 }
 
-
-//LGE_CHANGE, [hyungjoon.jeo@lge.com] , 2013-02-07
-#if defined(CONFIG_MACH_MSM7X25A_M4)
-ssize_t lm3530_store_chargerlogo(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-	int chargerlogo;	
-
-	if (!count)
-		return -EINVAL;
-
-	sscanf(buf, "%d", &chargerlogo);	
-	bl_chargerlogo = chargerlogo;	
-
-	return count;
-}
-#endif
-
-
 DEVICE_ATTR(alc, 0664, lm3530_show_alc, lm3530_store_alc);
 DEVICE_ATTR(reg, 0664, lm3530_show_reg, lm3530_store_reg);
 DEVICE_ATTR(drvstat, 0444, lm3530_show_drvstat, NULL);
-//LGE_CHANGE, [hyungjoon.jeo@lge.com] , 2013-02-07
-#if defined(CONFIG_MACH_MSM7X25A_M4)
-DEVICE_ATTR(chargerlogo, 0664, NULL, lm3530_store_chargerlogo);
-#endif
 
 static int lm3530_set_brightness(struct backlight_device *bd)
 {
@@ -901,10 +863,6 @@ static int __init lm3530_probe(struct i2c_client *i2c_dev, const struct i2c_devi
 		err = device_create_file(drvdata->led->dev, &dev_attr_alc);
 		err = device_create_file(drvdata->led->dev, &dev_attr_reg);
 		err = device_create_file(drvdata->led->dev, &dev_attr_drvstat);
-		//LGE_CHANGE, [hyungjoon.jeo@lge.com] , 2013-02-07
-		#if defined(CONFIG_MACH_MSM7X25A_M4)			
-		err = device_create_file(drvdata->led->dev, &dev_attr_chargerlogo);		
-		#endif
 	}
 #endif
 

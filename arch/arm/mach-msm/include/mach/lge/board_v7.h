@@ -531,7 +531,7 @@ unsigned lge_smpl_counter_f(int val);
 unsigned lge_charging_bypass_boot_f(int val);
 unsigned lge_pseudo_battery_mode_f(int val);
 /* LGE_CHANGE_S  : adiyoung.lee, FTM Mode and ManualModeCkeckComplete on RPC, 2012-12-12 */
-#if !defined(CONFIG_MACH_MSM7X25A_M4) && (defined (CONFIG_MACH_MSM7X25A_V3) || defined (CONFIG_MACH_MSM8X25_V7))
+#if defined (CONFIG_MACH_MSM7X25A_V3 || defined (CONFIG_MACH_MSM8X25_V7))
 unsigned lge_aat_partial_f(int val);
 unsigned lge_aat_full_f(int val);
 unsigned lge_aat_partial_or_full_f(int val);
