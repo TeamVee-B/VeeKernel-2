@@ -10,14 +10,27 @@
 
 # Function Start
 
-inchoice() {
+mainprocess() {
+devicechoice
+ccachechoice
+toolchainchoice
+}
+
+# Device Choice - Start
+
+devicechoice() {
+devicechoice1
+devicechoice2
+}
+
+devicechoice1() {
 echo ""
 echo "Script says: Choose to which you will build"; sleep .5
 echo "Caio99BR says: 1) L3 II Single"; sleep .5
 echo "Caio99BR says: 2) L3 II Dual"; sleep .5
 }
 
-devicechoice() {
+devicechoice2() {
 read -p "Choice: " -n 1 -s choice
 case "$choice" in
 	1 ) export target="L3"; export serie="II"; export variant="Single"; export defconfig=cyanogenmod_vee3_defconfig;;
@@ -28,158 +41,31 @@ echo "$choice - $target $serie $variant"; sleep .5
 make $defconfig &> /dev/null
 }
 
-mainprocess() {
-inchoice
-devicechoice
-ccachevariable
-echo ""
-echo "Caio99BR says: Checking if you have TeamVee Prebuilt Toolchains"; sleep 2
-if [ -d ../android_prebuilt_toolchains ]; then
-echo "Script says: Choose the toolchain"; sleep .5
-echo "Google GCC - 1) 4.7   | 2) 4.8"; sleep .5
-echo "Linaro GCC - 3) 4.6.4 | 4) 4.7.4"; sleep .5
-echo "Linaro GCC - 5) 4.8.4 | 6) 4.9.3"; sleep .5
-toolchainchoice
-else
-echo "Caio99BR says: You don't have TeamVee Prebuilt Toolchains"; sleep .5
-echo ""
-echo "Script says: Please specify a location"; sleep 1
-echo "Script says: and the prefix of the chosen toolchain at the end"; sleep 1
-echo "Caio99BR says: GCC 4.6 ex. ../arm-eabi-4.6/bin/arm-eabi-"; sleep 2
-toolchainplace
-fi
-echo "$CROSS_COMPILE"; sleep .5
-}
+# Device Choice - End
 
-toolchainchoice() {
-read -p "Choice: " -n 1 -s toolchain
-case "$toolchain" in
-	1 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-eabi-4.7/bin/arm-eabi-";;
-	2 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-eabi-4.8/bin/arm-eabi-";;
-	3 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-unknown-linux-gnueabi-linaro_4.6.4-2013.05/bin/arm-unknown-linux-gnueabi-";;
-	4 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-unknown-linux-gnueabi-linaro_4.7.4-2013.12/bin/arm-unknown-linux-gnueabi-";;
-	5 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-linux-gnueabi-linaro_4.8.4-2014.11/bin/arm-linux-gnueabi-";;
-	6 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-cortex-linux-gnueabi-linaro_4.9.3-2015.03/bin/arm-cortex-linux-gnueabi-";;
-	* ) echo "$toolchain - This option is not valid"; sleep 2; toolchainchoice;;
-esac
-}
+# CCache - Start
 
-toolchainplace() {
-read -p "Place: " -s CROSS_COMPILE
-}
-
-kernelclean() {
-echo "Cleaning..."
-make clean mrproper &> /dev/null
-}
-
-removelastzip() {
-rm -rf zip-creator/*.zip
-rm -rf zip-creator/kernel/zImage
-rm -rf zip-creator/system/lib/modules
-}
-
-coping() {
-mkdir -p zip-creator/system/lib/modules
-cp arch/arm/boot/zImage zip-creator/kernel
-find . -name *.ko | xargs cp -a --target-directory=zip-creator/system/lib/modules/
-}
-
-resume() {
-echo "Continuing...";
-}
-
-continuing() {
-echo -ne
-}
-
-preloop() {
-echo "Just wait"
-loop
-}
-
-loop() {
-LEND=$(date +"%s")
-LBUILDTIME=$(($LEND - $START))
-echo -ne "\r\033[K"
-echo -ne "\033[32mElapsed Time: $(($LBUILDTIME / 60)) minutes and $(($LBUILDTIME % 60)) seconds.\033[0m"
-sleep 1
-echo -ne "\r\033[K"
-looping
-}
-
-looping() {
-if [ -f zip-creator/*.zip ]; then
-	continuing
-else
-	loop
-fi
-}
-
-todual() {
-sed 's/Single/Dual/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
-rm zip-creator/META-INF/com/google/android/updater-script
-mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
-}
-
-tosingle() {
-sed 's/Dual/Single/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
-rm zip-creator/META-INF/com/google/android/updater-script
-mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
-}
-
-ziperror() {
-echo "Script says: The build failed so a zip won't be created"
-}
-
-ziper() {
-zipfile="$custom_kernel-$target-$serie-$variant-$version.zip"
-cd zip-creator
-zip -r $zipfile * -x *kernel/.gitignore*
-cd ..
-}
-
-buildprocess() {
-echo "Building..."
-sleep 1
-echo
-make -j `cat /proc/cpuinfo | grep "^processor" | wc -l` "$@"
-if [ -f arch/arm/boot/zImage ]; then
-	coping
-
-	if [ "$variant" == "Dual" ]; then
-		todual
-	fi
-
-	ziper
-
-	if [ "$variant" == "Dual" ]; then
-		tosingle
-	fi
-fi
-}
-
-ccachevariable() {
+ccachechoice() {
 ccachecheck=`cat .config | grep "# CONFIG_CCACHE is not set"`
 echo ""
 if [ "$ccachecheck" == "# CONFIG_CCACHE is not set" ]; then
-echo "Script Says: CCache Disabled"
-echo "Script says: You want to enable CCache?"
-read -p "Script says: Y for Enable, or Any key for continue: " -n 1 -s ccachec
-case $ccachec in
-	Y) ccacheenable;;
-	y) ccacheenable;;
-	*) resume;;
-esac
+	echo "Script Says: CCache Disabled"
+	echo "Script says: You want to enable CCache?"
+	read -p "Script says: Y for Enable, or Any key for continue: " -n 1 -s ccachec
+	case $ccachec in
+		Y) ccacheenable;;
+		y) ccacheenable;;
+		*) resume;;
+	esac
 else
-echo "Script Says: CCache Enabled"
-echo "Script says: You want to disable CCache?"
-read -p "Script says: N for Disable or Any key for continue: " -n 1 -s ccachec
-case $ccachec in
-	N) ccachedisable;;
-	n) ccachedisable;;
-	*) resume;;
-esac
+	echo "Script Says: CCache Enabled"
+	echo "Script says: You want to disable CCache?"
+	read -p "Script says: N for Disable or Any key for continue: " -n 1 -s ccachec
+	case $ccachec in
+		N) ccachedisable;;
+		n) ccachedisable;;
+		*) resume;;
+	esac
 fi
 }
 
@@ -198,13 +84,172 @@ mv .config-temp .config
 echo "Disabled!"
 }
 
+# CCache - End
+
+# Toolchain Choice - Start
+
+toolchainchoice() {
+if [ "$CROSS_COMPILE" == "" ]; then
+	echo ""
+	echo "Caio99BR says: Checking if you have TeamVee Prebuilt Toolchains"; sleep 2
+	if [ -d ../android_prebuilt_toolchains ]; then
+		toolchainchoicer
+	else
+		echo ""
+		echo "Caio99BR says: You don't have TeamVee Prebuilt Toolchains"; sleep .5
+		echo ""
+		echo "Script says: Please specify a location"; sleep 1
+		echo "Script says: and the prefix of the chosen toolchain at the end"; sleep 1
+		echo "Caio99BR says: GCC 4.6 ex. ../arm-eabi-4.6/bin/arm-eabi-"; sleep 2
+		toolchainplace
+	fi
+else
+	echo ""
+	echo "Script says: You want to set a new toolchain place?"
+	read -p "Script says: Enter any key for Continue or Y for Yes: " -n 1 -s newsettoolchain
+	case $newsettoolchain in
+		y) export CROSS_COMPILE=""; toolchainchoice;;
+		Y) export CROSS_COMPILE=""; toolchainchoice;;
+		*) resume; echo "Current Toolchain: $CROSS_COMPILE";;
+	esac
+fi
+}
+
+toolchainchoicer() {
+toolchainchoice1
+toolchainchoice2
+echo "$CROSS_COMPILE"; sleep .5
+}
+
+toolchainchoice1() {
+echo ""
+echo "Script says: Choose the toolchain"; sleep .5
+echo "Google GCC - 1) 4.7   | 2) 4.8"; sleep .5
+echo "Linaro GCC - 3) 4.6.4 | 4) 4.7.4"; sleep .5
+echo "Linaro GCC - 5) 4.8.4 | 6) 4.9.3"; sleep .5
+}
+
+toolchainchoice2() {
+read -p "Choice: " -n 1 -s toolchain
+case "$toolchain" in
+	1 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-eabi-4.7/bin/arm-eabi-";;
+	2 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-eabi-4.8/bin/arm-eabi-";;
+	3 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-unknown-linux-gnueabi-linaro_4.6.4-2013.05/bin/arm-unknown-linux-gnueabi-";;
+	4 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-unknown-linux-gnueabi-linaro_4.7.4-2013.12/bin/arm-unknown-linux-gnueabi-";;
+	5 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-linux-gnueabi-linaro_4.8.4-2014.11/bin/arm-linux-gnueabi-";;
+	6 ) export CROSS_COMPILE="../android_prebuilt_toolchains/arm-cortex-linux-gnueabi-linaro_4.9.3-2015.03/bin/arm-cortex-linux-gnueabi-";;
+	* ) echo "$toolchain - This option is not valid"; sleep 2; toolchainchoice2;;
+esac
+}
+
+toolchainplace() {
+read -p "Place: " CROSS_COMPILE
+echo "$CROSS_COMPILE"; sleep .5
+}
+
+# Toolchain Choice - End
+
+# Single/Dual - Start
+
+todual() {
+sed 's/Single/Dual/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
+rm zip-creator/META-INF/com/google/android/updater-script
+mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
+}
+
+tosingle() {
+sed 's/Dual/Single/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
+rm zip-creator/META-INF/com/google/android/updater-script
+mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
+}
+
+# Single/Dual - End
+
+# Loop - Start
+
+preloop() {
+echo "Just wait"
+loop
+}
+
+looping() {
+if [ -f zip-creator/*.zip ]; then
+	continuing
+else
+	loop
+fi
+}
+
+continuing() {
+echo -ne
+}
+
+loop() {
+LEND=$(date +"%s")
+LBUILDTIME=$(($LEND - $START))
+echo -ne "\r\033[K"
+echo -ne "\033[32mElapsed Time: $(($LBUILDTIME / 60)) minutes and $(($LBUILDTIME % 60)) seconds.\033[0m"
+sleep 1
+echo -ne "\r\033[K"
+looping
+}
+
+# Loop - End
+
+buildprocess() {
+echo "Building..."
+sleep 1
+echo
+make
+if [ -f arch/$ARCH/boot/zImage ]; then
+	if [ "$variant" == "Dual" ]; then
+		todual
+	fi
+
+	mkdir -p zip-creator/system/lib/modules
+	cp arch/$ARCH/boot/zImage zip-creator/kernel
+	find . -name *.ko | xargs cp -a --target-directory=zip-creator/system/lib/modules/
+
+	zipfile="$custom_kernel-$target-$serie-$variant-$version.zip"
+
+	cd zip-creator; zip -r $zipfile * -x *kernel/.gitignore*; cd ..
+
+	if [ "$variant" == "Dual" ]; then
+		tosingle
+	fi
+fi
+}
+
 # End - Function
+
+# Essentials - Start
+
+removelastzip() {
+rm -rf zip-creator/*.zip
+rm -rf zip-creator/kernel/zImage
+rm -rf zip-creator/system/lib/modules
+
+resume() {
+echo "Continuing...";
+}
+
+kernelclean() {
+echo "Cleaning..."
+make clean mrproper &> /dev/null
+}
+}
+
+ziperror() {
+echo "Script says: The build failed so a zip won't be created"
+}
+
+# Essentials - End
 
 # Start
 
 clear
 
-scriptrev=11.1
+scriptrev=12
 
 location=.
 custom_kernel=VeeKernel
@@ -223,10 +268,12 @@ echo ""
 echo "Script says: Choose."
 read -p "Script says: Any key for Restart Building Process or N for Continue: " -n 1 -s clean
 case $clean in
-	n) resume; inchoice; devicechoice;;
-	N) resume; inchoice; devicechoice;;
-	*) kernelclean; mainprocess;;
+	n) resume;;
+	N) resume;;
+	*) kernelclean;;
 esac
+
+mainprocess
 
 echo ""
 echo -e "Script says: Now, building the $custom_kernel for $target $serie $variant $version Edition!"; sleep .5
