@@ -249,11 +249,16 @@ echo "Script says: The build failed so a zip won't be created"
 
 clear
 
-scriptrev=12
+scriptrev=13
 
 location=.
 custom_kernel=VeeKernel
-version=Release
+version=$kernelversion.$kernelpatchlevel.$kernelsublevel
+
+kernelversion=`cat Makefile | grep VERSION | cut -c 11- | head -1`
+kernelpatchlevel=`cat Makefile | grep PATCHLEVEL | cut -c 14- | head -1`
+kernelsublevel=`cat Makefile | grep SUBLEVEL | cut -c 12- | head -1`
+kernelname=`cat Makefile | grep NAME | cut -c 8- | head -1`
 
 cd $location
 export ARCH=arm
@@ -261,6 +266,7 @@ export ARCH=arm
 echo ""
 echo "Caio99BR says: This is an open source script, feel free to use and share it."; sleep .5
 echo "Caio99BR says: Kernel Build Script Revision $scriptrev."; sleep .5
+echo "Caio99BR says: $kernelversion.$kernelpatchlevel.$kernelsublevel - $kernelname"; sleep .5
 
 removelastzip
 
@@ -280,9 +286,9 @@ echo -e "Script says: Now, building the $custom_kernel for $target $serie $varia
 
 echo ""
 echo "Script says: You want to see the details of kernel build?"
-read -p "Script says: Enter any key for Yes or N for No: " -n 1 -t 10 -s clean
+read -p "Script says: Enter any key for Yes or N for No: " -n 1 -t 10 -s building
 START=$(date +"%s")
-case $clean in
+case $building in
 	n) buildprocess &> /dev/null | preloop;;
 	N) buildprocess &> /dev/null | preloop;;
 	*) buildprocess;;
