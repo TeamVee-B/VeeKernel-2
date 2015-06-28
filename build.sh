@@ -15,6 +15,7 @@ rm -rf zip-creator/kernel/zImage
 rm -rf zip-creator/system/lib/modules
 cleanzipcheck=" - Done"
 zippackagecheck=""
+zipcheck
 }
 
 cleankernel() {
@@ -22,6 +23,7 @@ echo "Cleaning..."
 make clean mrproper &> /dev/null
 cleankernelcheck=" - Done"
 buildprocesscheck=""
+kernelcheck
 }
 
 # Clean - End
@@ -124,27 +126,29 @@ START=$(date +"%s")
 make -j4
 END=$(date +"%s")
 BUILDTIME=$(($END - $START))
-echo -e "\033[32mBuild Time: $(($BUILDTIME / 60)) minutes and $(($BUILDTIME % 60)) seconds.\033[0m"
 buildprocesscheck=" - Done"
 cleankernelcheck=""
 }
 
 zippackage() {
 if [ -f arch/arm/boot/zImage ]; then
+	echo "Script says: Ziping..."
 	if [ "$variant" == "Dual" ]; then
-		todual
+		todual  &> /dev/null
 	fi
 
-	mkdir -p zip-creator/system/lib/modules
-	cp arch/arm/boot/zImage zip-creator/kernel
-	find . -name *.ko | xargs cp -a --target-directory=zip-creator/system/lib/modules/
+	mkdir -p zip-creator/system/lib/modules  &> /dev/null
+	cp arch/arm/boot/zImage zip-creator/kernel  &> /dev/null
+	find . -name *.ko | xargs cp -a --target-directory=zip-creator/system/lib/modules/  &> /dev/null
 
 	zipfile="$customkernel-$target-$serie-$variant-$version.zip"
 
-	cd zip-creator; zip -r $zipfile * -x *kernel/.gitignore*; cd ..
+	cd zip-creator
+	zip -r $zipfile * -x *kernel/.gitignore* &> /dev/null
+	cd ..
 
 	if [ "$variant" == "Dual" ]; then
-		tosingle
+		tosingle  &> /dev/null
 	fi
 else
 	echo "Script says: Build Kernel First!"
@@ -178,9 +182,9 @@ zippackagecheck=""
 
 kernelcheck() {
 if [ -f arch/arm/boot/zImage ]; then
-	kernelchecked="Kernel Image Builded."
+	kernelchecked="echo -e \033[32mLast Kernel Build Elapsed Time: $(($BUILDTIME / 60)) minutes and $(($BUILDTIME % 60)) seconds.\033[0m"
 else
-	kernelchecked="No Kernel Image."
+	kernelchecked="echo No Kernel Image."
 fi
 }
 
@@ -208,7 +212,7 @@ do
 	clear
 	echo ""
 	echo "Caio99BR says: This is an open source script, feel free to use and share it."
-	echo "Caio99BR says: Simple Kernel Build Script Revision Final."
+	echo "Caio99BR says: Simple $customkernel Build Script."
 	echo "Caio99BR says: $kernelversion.$kernelpatchlevel.$kernelsublevel - $kernelname"
 	echo
 	echo "Clean:"
@@ -224,7 +228,7 @@ do
 	echo "6) Build Zip Package$zippackagecheck"
 	echo
 	echo "Status:"
-	echo "$kernelchecked"
+	$kernelchecked
 	echo "$zipchecked"
 	echo
 	echo "q) Quit"
