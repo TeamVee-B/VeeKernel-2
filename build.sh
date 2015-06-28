@@ -1,36 +1,47 @@
 #!/bin/bash
-
 # Base by cybojenix <anthonydking@gmail.com>
-# Updated by Caio Oliveira aka Caio99BR <caiooliveirafarias0@gmail.com>
-# credits to Rashed for the base of zip making
-# credits to the internet for filling in else where
+# ReWriten by Caio Oliveira aka Caio99BR <caiooliveirafarias0@gmail.com>
+# Rashed for the base of zip making
+# And the internet for filling in else where
 
 # You need to download https://github.com/TeamVee/android_prebuilt_toolchains
 # Clone in the same folder as the kernel
 
-# Function Start
+# Clean - Start
 
-mainprocess() {
-devicechoice
-ccachechoice
-toolchainchoice
+cleanzip() {
+rm -rf zip-creator/*.zip
+rm -rf zip-creator/kernel/zImage
+rm -rf zip-creator/system/lib/modules
+cleanzipcheck=" - Done"
+zippackagecheck=""
 }
 
-# Device Choice - Start
+cleankernel() {
+echo "Cleaning..."
+make clean mrproper &> /dev/null
+cleankernelcheck=" - Done"
+buildprocesscheck=""
+}
+
+# Clean - End
+
+# Main Process - Start
+
+maindevice() {
+devicechoice
+devicechoicer
+}
 
 devicechoice() {
-devicechoice1
-devicechoice2
-}
-
-devicechoice1() {
+clear
 echo ""
 echo "Script says: Choose to which you will build"; sleep .5
 echo "Caio99BR says: 1) L3 II Single"; sleep .5
 echo "Caio99BR says: 2) L3 II Dual"; sleep .5
 }
 
-devicechoice2() {
+devicechoicer() {
 read -p "Choice: " -n 1 -s choice
 case "$choice" in
 	1 ) export target="L3"; export serie="II"; export variant="Single"; export defconfig=cyanogenmod_vee3_defconfig;;
@@ -41,60 +52,15 @@ echo "$choice - $target $serie $variant"; sleep .5
 make $defconfig &> /dev/null
 }
 
-# Device Choice - End
-
-# CCache - Start
-
-ccachechoice() {
-ccachecheck=`cat .config | grep "# CONFIG_CCACHE is not set"`
-echo ""
-if [ "$ccachecheck" == "# CONFIG_CCACHE is not set" ]; then
-	echo "Script Says: CCache Disabled"
-	echo "Script says: You want to enable CCache?"
-	read -p "Script says: Y for Enable, or Any key for continue: " -n 1 -s ccachec
-	case $ccachec in
-		Y) ccacheenable;;
-		y) ccacheenable;;
-		*) resume;;
-	esac
-else
-	echo "Script Says: CCache Enabled"
-	echo "Script says: You want to disable CCache?"
-	read -p "Script says: N for Disable or Any key for continue: " -n 1 -s ccachec
-	case $ccachec in
-		N) ccachedisable;;
-		n) ccachedisable;;
-		*) resume;;
-	esac
-fi
-}
-
-ccacheenable() {
-sed 's/# CONFIG_CCACHE is not set/CONFIG_CCACHE=y/' .config > .config-temp
-rm .config
-mv .config-temp .config
-export USE_CCACHE=1
-echo "Enabled!"
-}
-
-ccachedisable() {
-sed 's/CONFIG_CCACHE=y/# CONFIG_CCACHE is not set/' .config > .config-temp
-rm .config
-mv .config-temp .config
-echo "Disabled!"
-}
-
-# CCache - End
-
-# Toolchain Choice - Start
-
-toolchainchoice() {
+maintoolchain() {
 if [ "$CROSS_COMPILE" == "" ]; then
+	clear
 	echo ""
-	echo "Caio99BR says: Checking if you have TeamVee Prebuilt Toolchains"; sleep 2
+	echo "Caio99BR says: Checking if you have TeamVee Prebuilt Toolchains"; sleep 1
 	if [ -d ../android_prebuilt_toolchains ]; then
-		toolchainchoicer
+		toolchainchoice
 	else
+		clear
 		echo ""
 		echo "Caio99BR says: You don't have TeamVee Prebuilt Toolchains"; sleep .5
 		echo ""
@@ -104,18 +70,18 @@ if [ "$CROSS_COMPILE" == "" ]; then
 		toolchainplace
 	fi
 else
+	clear
 	echo ""
 	echo "Script says: You want to set a new toolchain place?"
-	read -p "Script says: Enter any key for Continue or Y for Yes: " -n 1 -s newsettoolchain
+	read -p "Script says: Enter any key for Continue or y for Yes: " -n 1 -s newsettoolchain
 	case $newsettoolchain in
-		y) export CROSS_COMPILE=""; toolchainchoice;;
-		Y) export CROSS_COMPILE=""; toolchainchoice;;
-		*) resume; echo "Current Toolchain: $CROSS_COMPILE";;
+		y) export CROSS_COMPILE=""; maintoolchain;;
+		*) echo "Continuing..."; echo "Current Toolchain: $CROSS_COMPILE";;
 	esac
 fi
 }
 
-toolchainchoicer() {
+toolchainchoice() {
 toolchainchoice1
 toolchainchoice2
 echo "$CROSS_COMPILE"; sleep .5
@@ -147,9 +113,45 @@ read -p "Place: " CROSS_COMPILE
 echo "$CROSS_COMPILE"; sleep .5
 }
 
-# Toolchain Choice - End
+# Main Process - End
 
-# Single/Dual - Start
+# Build Process - Start
+
+buildprocess() {
+echo "Building..."; sleep 1
+echo
+START=$(date +"%s")
+make -j4
+END=$(date +"%s")
+BUILDTIME=$(($END - $START))
+echo -e "\033[32mBuild Time: $(($BUILDTIME / 60)) minutes and $(($BUILDTIME % 60)) seconds.\033[0m"
+buildprocesscheck=" - Done"
+cleankernelcheck=""
+}
+
+zippackage() {
+if [ -f arch/arm/boot/zImage ]; then
+	if [ "$variant" == "Dual" ]; then
+		todual
+	fi
+
+	mkdir -p zip-creator/system/lib/modules
+	cp arch/arm/boot/zImage zip-creator/kernel
+	find . -name *.ko | xargs cp -a --target-directory=zip-creator/system/lib/modules/
+
+	zipfile="$customkernel-$target-$serie-$variant-$version.zip"
+
+	cd zip-creator; zip -r $zipfile * -x *kernel/.gitignore*; cd ..
+
+	if [ "$variant" == "Dual" ]; then
+		tosingle
+	fi
+else
+	echo "Script says: Build Kernel First!"
+fi
+zippackagecheck=" - Done"
+cleanzipcheck=""
+}
 
 todual() {
 sed 's/Single/Dual/' zip-creator/META-INF/com/google/android/updater-script > zip-creator/META-INF/com/google/android/updater-script-temp
@@ -163,145 +165,94 @@ rm zip-creator/META-INF/com/google/android/updater-script
 mv zip-creator/META-INF/com/google/android/updater-script-temp zip-creator/META-INF/com/google/android/updater-script
 }
 
-# Single/Dual - End
+# Build Process - End
 
-# Loop - Start
+# Check - Start
 
-preloop() {
-echo "Just wait"
-loop
+emptycheck() {
+cleanzipcheck=""
+cleankernelcheck=""
+buildprocesscheck=""
+zippackagecheck=""
 }
 
-looping() {
-if [ -f zip-creator/*.zip ]; then
-	continuing
+kernelcheck() {
+if [ -f arch/arm/boot/zImage ]; then
+	kernelchecked="Kernel Image Builded."
 else
-	loop
+	kernelchecked="No Kernel Image."
 fi
 }
 
-continuing() {
-echo -ne
-}
-
-loop() {
-LEND=$(date +"%s")
-LBUILDTIME=$(($LEND - $START))
-echo -ne "\r\033[K"
-echo -ne "\033[32mElapsed Time: $(($LBUILDTIME / 60)) minutes and $(($LBUILDTIME % 60)) seconds.\033[0m"
-sleep 1
-echo -ne "\r\033[K"
-looping
-}
-
-# Loop - End
-
-buildprocess() {
-echo "Building..."
-sleep 1
-echo
-make
-if [ -f arch/$ARCH/boot/zImage ]; then
-	if [ "$variant" == "Dual" ]; then
-		todual
-	fi
-
-	mkdir -p zip-creator/system/lib/modules
-	cp arch/$ARCH/boot/zImage zip-creator/kernel
-	find . -name *.ko | xargs cp -a --target-directory=zip-creator/system/lib/modules/
-
-	zipfile="$custom_kernel-$target-$serie-$variant-$version.zip"
-
-	cd zip-creator; zip -r $zipfile * -x *kernel/.gitignore*; cd ..
-
-	if [ "$variant" == "Dual" ]; then
-		tosingle
-	fi
+zipcheck() {
+if [ -f zip-creator/*.zip ]; then
+	zipchecked=`ls zip-creator/*.zip`
+else
+	zipchecked="No Package."
 fi
 }
 
-# End - Function
+# Check - End
+customkernel=VeeKernel
+version=Stable
 
-# Essentials - Start
+# Menu - Start
 
-removelastzip() {
-rm -rf zip-creator/*.zip
-rm -rf zip-creator/kernel/zImage
-rm -rf zip-creator/system/lib/modules
-
-resume() {
-echo "Continuing...";
-}
-
-kernelclean() {
-echo "Cleaning..."
-make clean mrproper &> /dev/null
-}
-}
-
-ziperror() {
-echo "Script says: The build failed so a zip won't be created"
-}
-
-# Essentials - End
-
-# Start
-
-clear
-
-scriptrev=13
-
-location=.
-custom_kernel=VeeKernel
-version=$kernelversion.$kernelpatchlevel.$kernelsublevel
-
+buildsh() {
 kernelversion=`cat Makefile | grep VERSION | cut -c 11- | head -1`
 kernelpatchlevel=`cat Makefile | grep PATCHLEVEL | cut -c 14- | head -1`
 kernelsublevel=`cat Makefile | grep SUBLEVEL | cut -c 12- | head -1`
 kernelname=`cat Makefile | grep NAME | cut -c 8- | head -1`
+while :
+do
+	clear
+	echo ""
+	echo "Caio99BR says: This is an open source script, feel free to use and share it."
+	echo "Caio99BR says: Simple Kernel Build Script Revision Final."
+	echo "Caio99BR says: $kernelversion.$kernelpatchlevel.$kernelsublevel - $kernelname"
+	echo
+	echo "Clean:"
+	echo "1) Last Zip Package$cleanzipcheck"
+	echo "2) Last Kernel$cleankernelcheck"
+	echo
+	echo "Main Process:"
+	echo "3) Device Choice - $target $serie $variant"
+	echo "4) Toolchain Choice - $CROSS_COMPILE"
+	echo
+	echo "Build Process:"
+	echo "5) Build Kernel$buildprocesscheck"
+	echo "6) Build Zip Package$zippackagecheck"
+	echo
+	echo "Status:"
+	echo "$kernelchecked"
+	echo "$zipchecked"
+	echo
+	echo "q) Quit"
+	read -n 1 -p "Choice: " -s x
+	case $x in
+		1) cleanzip;;
+		2) cleankernel;;
+		3) maindevice;;
+		4) maintoolchain;;
+		5) buildprocess;;
+		6) zippackage;;
+		q) echo "Ok, bye!"; sleep 1; echo; emptycheck; exit 0
+	esac
+done
+}
 
-cd $location
-export ARCH=arm
+# Menu - End
 
-echo ""
-echo "Caio99BR says: This is an open source script, feel free to use and share it."; sleep .5
-echo "Caio99BR says: Kernel Build Script Revision $scriptrev."; sleep .5
-echo "Caio99BR says: $kernelversion.$kernelpatchlevel.$kernelsublevel - $kernelname"; sleep .5
-
-removelastzip
-
-echo ""
-echo "Script says: Choose."
-read -p "Script says: Any key for Restart Building Process or N for Continue: " -n 1 -s clean
-case $clean in
-	n) resume;;
-	N) resume;;
-	*) kernelclean;;
-esac
-
-mainprocess
-
-echo ""
-echo -e "Script says: Now, building the $custom_kernel for $target $serie $variant $version Edition!"; sleep .5
-
-echo ""
-echo "Script says: You want to see the details of kernel build?"
-read -p "Script says: Enter any key for Yes or N for No: " -n 1 -t 10 -s building
-START=$(date +"%s")
-case $building in
-	n) buildprocess &> /dev/null | preloop;;
-	N) buildprocess &> /dev/null | preloop;;
-	*) buildprocess;;
-esac
-
-if [ -f zip-creator/$zipfile ]; then
-	echo -e "\033[36mPackage Complete: zip-creator/$zipfile"
-else
-	ziperror
+if [ ! -e build.sh ]; then
+	echo
+	echo "Ensure you run this file from the SAME folder as where it was"
+	echo "installed, otherwise the build script will have problems running the"
+	echo "commands.  After you 'cd' to the correct folder, start the build script"
+	echo "with the ./build.sh command, NOT with any other command or method!"; sleep 2
+	exit 0
 fi
 
-END=$(date +"%s")
-BUILDTIME=$(($END - $START))
-echo -e "\033[32mBuild Time: $(($BUILDTIME / 60)) minutes and $(($BUILDTIME % 60)) seconds.\033[0m"
+kernelcheck
+zipcheck
 
-# End
+buildsh
