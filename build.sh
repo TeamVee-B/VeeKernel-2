@@ -15,7 +15,6 @@ rm -rf zip-creator/kernel/zImage
 rm -rf zip-creator/system/lib/modules
 cleanzipcheck=" - Done"
 zippackagecheck=""
-zipcheck
 }
 
 cleankernel() {
@@ -23,7 +22,6 @@ echo "Cleaning..."
 make clean mrproper &> /dev/null
 cleankernelcheck=" - Done"
 buildprocesscheck=""
-kernelcheck
 }
 
 # Clean - End
@@ -180,22 +178,6 @@ buildprocesscheck=""
 zippackagecheck=""
 }
 
-kernelcheck() {
-if [ -f arch/arm/boot/zImage ]; then
-	kernelchecked="echo -e \033[32mLast Kernel Build Elapsed Time: $(($BUILDTIME / 60)) minutes and $(($BUILDTIME % 60)) seconds.\033[0m"
-else
-	kernelchecked="echo No Kernel Image."
-fi
-}
-
-zipcheck() {
-if [ -f zip-creator/*.zip ]; then
-	zipchecked=`ls zip-creator/*.zip`
-else
-	zipchecked="No Package."
-fi
-}
-
 # Check - End
 customkernel=VeeKernel
 version=Stable
@@ -227,10 +209,6 @@ do
 	echo "5) Build Kernel$buildprocesscheck"
 	echo "6) Build Zip Package$zippackagecheck"
 	echo
-	echo "Status:"
-	$kernelchecked
-	echo "$zipchecked"
-	echo
 	echo "q) Quit"
 	read -n 1 -p "Choice: " -s x
 	case $x in
@@ -255,8 +233,5 @@ if [ ! -e build.sh ]; then
 	echo "with the ./build.sh command, NOT with any other command or method!"; sleep 2
 	exit 0
 fi
-
-kernelcheck
-zipcheck
 
 buildsh
