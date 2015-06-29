@@ -13,15 +13,18 @@ cleanzip() {
 rm -rf zip-creator/*.zip
 rm -rf zip-creator/kernel/zImage
 rm -rf zip-creator/system/lib/modules
-cleanzipcheck=" - Done"
+cleanzipcheck="Done"
 zippackagecheck=""
 }
 
 cleankernel() {
 echo "Cleaning..."
 make clean mrproper &> /dev/null
-cleankernelcheck=" - Done"
+cleankernelcheck="Done"
 buildprocesscheck=""
+target=""
+serie=""
+variant=""
 }
 
 # Clean - End
@@ -124,7 +127,7 @@ START=$(date +"%s")
 make -j4
 END=$(date +"%s")
 BUILDTIME=$(($END - $START))
-buildprocesscheck=" - Done"
+buildprocesscheck="Done"
 cleankernelcheck=""
 }
 
@@ -151,7 +154,7 @@ if [ -f arch/arm/boot/zImage ]; then
 else
 	echo "Script says: Build Kernel First!"
 fi
-zippackagecheck=" - Done"
+zippackagecheck="Done"
 cleanzipcheck=""
 }
 
@@ -198,17 +201,21 @@ do
 	echo "Caio99BR says: $kernelversion.$kernelpatchlevel.$kernelsublevel - $kernelname"
 	echo
 	echo "Clean:"
-	echo "1) Last Zip Package$cleanzipcheck"
-	echo "2) Last Kernel$cleankernelcheck"
+	echo "1) Last Zip Package ( $cleanzipcheck)"
+	echo "2) Last Kernel ( $cleankernelcheck)"
 	echo
 	echo "Main Process:"
-	echo "3) Device Choice - $target $serie $variant"
-	echo "4) Toolchain Choice - $CROSS_COMPILE"
+	echo "3) Device Choice ($target$serie $variant)"
+	echo "4) Toolchain Choice ($CROSS_COMPILE)"
 	echo
 	echo "Build Process:"
-	echo "5) Build Kernel$buildprocesscheck"
-	echo "6) Build Zip Package$zippackagecheck"
+	echo "5) Build Kernel ( $buildprocesscheck)"
+	echo "6) Build Zip Package ( $zippackagecheck)"
 	echo
+	if ! [ "$BUILDTIME" == "" ]; then
+	echo -e "\033[32mBuild Time: $(($BUILDTIME / 60)) minutes and $(($BUILDTIME % 60)) seconds.\033[0m"
+	echo
+	fi
 	echo "q) Quit"
 	read -n 1 -p "Choice: " -s x
 	case $x in
