@@ -11,8 +11,8 @@
 
 cleanzip() {
 rm -rf zip-creator/*.zip
-rm -rf zip-creator/kernel/zImage
-rm -rf zip-creator/system/lib/modules
+rm -rf zip-creator/zImage
+rm -rf zip-creator/system/lib/modules/*.ko
 cleanzipcheck="Done"
 zippackagecheck=""
 adbcopycheck=""
@@ -93,14 +93,13 @@ if [ "$variant" == "Dual" ]; then
 	todual
 fi
 
-mkdir -p zip-creator/system/lib/modules
-cp arch/arm/boot/zImage zip-creator/kernel
+cp arch/arm/boot/zImage zip-creator
 find . -name *.ko | xargs cp -a --target-directory=zip-creator/system/lib/modules/ &> /dev/null
 
 zipfile="$customkernel-$target$serie$variant-$version.zip"
 
 cd zip-creator
-zip -r $zipfile * -x *kernel/.gitignore* &> /dev/null
+zip -r $zipfile * -x */.gitignore* &> /dev/null
 cd ..
 
 if [ "$variant" == "Dual" ]; then
@@ -132,8 +131,8 @@ echo "i) For Internal"
 echo "e) For External"
 read -p "Choice: " -n 1 -s adbcoping
 case "$adbcoping" in
-	i ) adb push zip-creator/$zipfile /storage/sdcard0/$zipfile &> /dev/null; adbcopycheck="Done";;
-	e ) adb push zip-creator/$zipfile /storage/sdcard1/$zipfile &> /dev/null; adbcopycheck="Done";;
+	i ) echo "Coping to Internal Card..."; adb shell rm -rf /storage/sdcard0/$zipfile; adb push zip-creator/$zipfile /storage/sdcard0/$zipfile &> /dev/null; adbcopycheck="Done";;
+	e ) echo "Coping to External Card..."; adb shell rm -rf /storage/sdcard1/$zipfile; adb push zip-creator/$zipfile /storage/sdcard1/$zipfile &> /dev/null; adbcopycheck="Done";;
 	* ) echo "$adbcoping - This option is not valid"; sleep 2;;
 esac
 }
@@ -151,9 +150,9 @@ kernelpatchlevel=`cat Makefile | grep PATCHLEVEL | cut -c 14- | head -1`
 kernelsublevel=`cat Makefile | grep SUBLEVEL | cut -c 12- | head -1`
 kernelname=`cat Makefile | grep NAME | cut -c 8- | head -1`
 clear
-echo "Caio99BR says: This is an open source script, feel free to use and share it."
+echo "Caio99BR says: This is an open source script, feel free to use, edit and share it."
 echo "Caio99BR says: Simple $customkernel Build Script."
-echo "Caio99BR says: $kernelversion.$kernelpatchlevel.$kernelsublevel - $kernelname"
+echo "Caio99BR says: Linux Kernel $kernelversion.$kernelpatchlevel.$kernelsublevel - $kernelname"
 echo
 echo "Clean:"
 echo "1) Last Zip Package ($cleanzipcheck)"
@@ -180,6 +179,10 @@ if [ -f zip-creator/*.zip ]; then
 	echo
 	echo "7) Copy to device - Via Adb ($adbcopycheck)"
 fi
+if [ "$adbcopycheck" == "Done" ]; then
+	echo
+	echo "8) Reboot device to recovery"
+fi
 echo
 if ! [ "$BUILDTIME" == "" ]; then
 	echo -e "\033[32mBuild Time: $(($BUILDTIME / 60)) minutes and $(($BUILDTIME % 60)) seconds.\033[0m"
@@ -200,6 +203,9 @@ case $x in
 	fi;;
 	7) if [ -f zip-creator/*.zip ]; then
 		echo "$x - Coping Kernel..."; adbcopy; buildsh
+	fi;;
+	8) if [ "$adbcopycheck" == "Done" ]; then
+		echo "$x - Rebooting $target$serie$variant..."; adb reboot recovery; buildsh
 	fi;;
 	q) echo "Ok, Bye!"; zippackagecheck="";;
 	*) echo "$x - This option is not valid"; sleep 2; buildsh;;
