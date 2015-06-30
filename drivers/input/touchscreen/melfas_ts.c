@@ -2,6 +2,7 @@
  * MELFAS mcs8000 touchscreen driver
  *
  * Copyright (C) 2011 LGE, Inc.
+ * Copyright (C) 2015 TeamVee.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +39,6 @@
 #include <linux/i2c-gpio.h>
 #include CONFIG_LGE_BOARD_HEADER_FILE
 
-
 #ifdef CONFIG_HAS_EARLYSUSPEND
 #include <linux/earlysuspend.h>
 static struct early_suspend ts_early_suspend;
@@ -46,14 +46,12 @@ static void mcs8000_early_suspend(struct early_suspend *h);
 static void mcs8000_late_resume(struct early_suspend *h);
 #endif
 
-
 int mcs8000_ts_on(void);
 static void mcs8000_Data_Clear(void);
 static void ResetTS(void);
 static void Release_All_Fingers(void);
 
 #define TS_POLLING_TIME 0 /* msec */
-
 
 #define DEBUG_TS 0 /* enable or disable debug message */
 
@@ -79,13 +77,8 @@ static void Release_All_Fingers(void);
 #define TS_READ_START_ADDR	0x0F
 #define TS_READ_START_ADDR2	0x10
 
-#if 1	//  woden@lge.com [2013-02-26] => New TS Firmware was applied.
 #define TS_LATEST_FW_VERSION_EU_SUN	0x16
 #define TS_LATEST_FW_VERSION_EU_INO	0x20
-#else
-#define TS_LATEST_FW_VERSION_EU_SUN	0x15
-#define TS_LATEST_FW_VERSION_EU_INO	0x18
-#endif
 
 #define TS_READ_REGS_LEN	66
 #define MELFAS_MAX_TOUCH	11
@@ -95,16 +88,12 @@ static void Release_All_Fingers(void);
 #define RELEASE_KEY	0
 #define DEBUG_PRINT	0
 
-
-
 #define	SET_DOWNLOAD_BY_GPIO	1
 #define GPIO_TOUCH_ID 121
 
-#if defined(CONFIG_MACH_MSM7X25A_V3_DS) || defined(CONFIG_MACH_MSM7X25A_V1)
 #define KEY_SIM_SWITCH 223
-#endif
 
-int power_flag=0;
+int power_flag = 0;
 static int irq_flag;
 
 enum {
@@ -119,7 +108,6 @@ struct muti_touch_info {
 	int posX;
 	int posY;
 };
-
 
 struct mcs8000_ts_device {
 	struct i2c_client *client;
@@ -193,7 +181,6 @@ static void ResetTS(void)
 	mcs8000_ts_on();	
 
 	printk(KERN_DEBUG "Reset TS For ESD\n");
-
 }
 
 int CheckTSForESD(unsigned char ucData)
@@ -241,16 +228,15 @@ static void Release_All_Fingers(void)
 		input_sync(dev->input_dev);		
 }
 
-
 static void mcs8000_work(struct work_struct *work)
 {
 	int read_num, FingerID;
 	int touchType = 0, touchState = 0;
 	struct mcs8000_ts_device *ts = container_of(to_delayed_work(work), struct mcs8000_ts_device, work);
-	int ret 		= 0;
+	int ret = 0;
 	int i = 0, j = 0;
 	uint8_t buf[TS_READ_REGS_LEN];
-  int keyID 	= 0;
+	int keyID = 0;
 	int iTouchedCnt;
 	
 	int Is_Touch_Valid = 0;
@@ -378,17 +364,22 @@ static void mcs8000_work(struct work_struct *work)
 				touchState = (buf[i] & 0x80);
 
 				if(g_touchLogEnable)
-					printk(KERN_INFO "keyID    : [%d]\n", keyID);
+					printk(KERN_INFO "keyID : [%d]\n", keyID);
 
-#if defined(CONFIG_MACH_MSM7X25A_V3_DS) || defined(CONFIG_MACH_MSM7X25A_V1)
 				switch(keyID)
 				{
 					case 0x1:
 						input_report_key(ts->input_dev, KEY_BACK, touchState ? PRESS_KEY : RELEASE_KEY);
 						break;
+#ifdef CONFIG_MACH_MSM7X25A_V3_DS
 					case 0x2:
 						input_report_key(ts->input_dev, KEY_HOMEPAGE, touchState ? PRESS_KEY : RELEASE_KEY);
 						break;
+#else
+					case 0x2:
+						input_report_key(ts->input_dev, KEY_MENU, touchState ? PRESS_KEY : RELEASE_KEY);
+						break;
+#endif
 					case 0x3:
 						input_report_key(ts->input_dev, KEY_MENU, touchState ? PRESS_KEY : RELEASE_KEY);
 						break;
@@ -398,12 +389,6 @@ static void mcs8000_work(struct work_struct *work)
 					default:
 						break;					
 				}
-#else
-				if (keyID == 0x1)
-					input_report_key(ts->input_dev, KEY_BACK, touchState ? PRESS_KEY : RELEASE_KEY);
-				if (keyID == 0x2)
-					input_report_key(ts->input_dev, KEY_MENU, touchState ? PRESS_KEY : RELEASE_KEY);
-#endif
 			}
 		}
 
@@ -435,13 +420,11 @@ static void mcs8000_work(struct work_struct *work)
 				} else {
 					input_mt_sync(ts->input_dev);
 				}
-				#if 1
 				if(g_touchLogEnable)
 				{
 					printk(KERN_ERR "melfas_ts_work_func: Touch ID: %d, State : %d, x: %d, y: %d, z: %d w: %d\n", 
 							j, (g_Mtouch_info[j].strength>0), g_Mtouch_info[j].posX, g_Mtouch_info[j].posY, g_Mtouch_info[j].strength, g_Mtouch_info[j].width);
 				}
-				#endif	
 
 				if(g_Mtouch_info[j].strength == 0){
 					g_Mtouch_info[j].strength = -1;
@@ -464,7 +447,6 @@ static void mcs8000_work(struct work_struct *work)
 		irq_flag++;
 		enable_irq(ts->client->irq);
 	}
-	
 }
 
 static void mcs8000_Data_Clear(void) /* for touch stable */
@@ -481,7 +463,6 @@ static void mcs8000_Data_Clear(void) /* for touch stable */
 
 	}
 }
-
 
 static irqreturn_t mcs8000_ts_irq_handler(int irq, void *handle)
 {
@@ -603,19 +584,18 @@ static int mcs8000_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	input_set_abs_params(mcs8000_ts_input, ABS_MT_PRESSURE, 0, 255, 0, 0);
 
 #if DEBUG_PRINT
-  printk(KERN_INFO "ABS_MT_POSITION_X123 :  ABS_MT_POSITION_Y = [%d] : [%d] \n", ts_pdata->ts_x_max, ts_pdata->ts_y_max);
+	printk(KERN_INFO "ABS_MT_POSITION_X123 :  ABS_MT_POSITION_Y = [%d] : [%d] \n", ts_pdata->ts_x_max, ts_pdata->ts_y_max);
 #endif
 
 	dev = &mcs8000_ts_dev;
 
-	 INIT_DELAYED_WORK(&dev->work, mcs8000_work);
+	INIT_DELAYED_WORK(&dev->work, mcs8000_work);
 
 	dev->power = ts_pdata->power;
 	dev->num_irq = client->irq;
 	dev->intr_gpio	= (client->irq) - NR_MSM_IRQS ;
 	dev->sda_gpio = ts_pdata->sda;
 	dev->scl_gpio  = ts_pdata->scl;
-
 
 	dev->input_dev = mcs8000_ts_input;
 	DMSG("mcs8000 dev->num_irq is %d , dev->intr_gpio is %d\n", dev->num_irq, dev->intr_gpio);
@@ -692,14 +672,13 @@ static int mcs8000_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	if(fw_ret!=0){
 		mms100_ISC_download_binary_data(0,0,vendor);
 	}
-	
-	
+
 #ifdef CONFIG_HAS_EARLYSUSPEND
 	ts_early_suspend.suspend = mcs8000_early_suspend;
 	ts_early_suspend.resume = mcs8000_late_resume;
 	ts_early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1 ;
 	register_early_suspend(&ts_early_suspend);
-#endif	
+#endif
 	return 0;
 }
 
@@ -718,7 +697,6 @@ static int mcs8000_ts_suspend(struct i2c_client *client, pm_message_t mesg)
 {
 	struct mcs8000_ts_device *dev = i2c_get_clientdata(client);
 
-	
 		DMSG(KERN_INFO"%s: start! \n", __FUNCTION__);
 		if (irq_flag == 1) {
 		irq_flag--;	
@@ -730,7 +708,7 @@ static int mcs8000_ts_suspend(struct i2c_client *client, pm_message_t mesg)
 		if(power_flag==1){
 			power_flag--;
 			dev->power(OFF);
-			}	
+			}
 
 	return 0;
 }
@@ -739,7 +717,6 @@ static int mcs8000_ts_resume(struct i2c_client *client)
 {
 	struct mcs8000_ts_device *dev = i2c_get_clientdata(client);
 
-	
 		DMSG(KERN_INFO"%s: start! \n", __FUNCTION__);
 
 		if(power_flag==0){
@@ -753,7 +730,6 @@ static int mcs8000_ts_resume(struct i2c_client *client)
 		}
 		
 		DMSG("%s: irq enable\n", __FUNCTION__);
-	
 
 	return 0;
 }
@@ -807,7 +783,6 @@ static const struct i2c_device_id mcs8000_ts_id[] = {
 	{ }
 };
 
-
 static struct i2c_driver mcs8000_i2c_ts_driver = {
 	.probe = mcs8000_ts_probe,
 	.remove = mcs8000_ts_remove,
@@ -848,10 +823,10 @@ static int __devinit mcs8000_ts_init(void)
 
 	mcs8000_ts_input->keybit[BIT_WORD(KEY_BACK)] |= BIT_MASK(KEY_BACK);
 	mcs8000_ts_input->keybit[BIT_WORD(KEY_MENU)] |= BIT_MASK(KEY_MENU);
-#if defined(CONFIG_MACH_MSM7X25A_V3_DS) || defined(CONFIG_MACH_MSM7X25A_V1)
+#ifdef CONFIG_MACH_MSM7X25A_V3_DS
 	mcs8000_ts_input->keybit[BIT_WORD(KEY_HOMEPAGE)] |= BIT_MASK(KEY_HOMEPAGE);
-	mcs8000_ts_input->keybit[BIT_WORD(KEY_SIM_SWITCH)] |= BIT_MASK(KEY_SIM_SWITCH);
 #endif
+	mcs8000_ts_input->keybit[BIT_WORD(KEY_SIM_SWITCH)] |= BIT_MASK(KEY_SIM_SWITCH);
 
 	err = input_register_device(mcs8000_ts_input);
 	if (err < 0) {

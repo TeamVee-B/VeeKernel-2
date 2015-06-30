@@ -2,6 +2,7 @@
  * MELFAS mcs8000 touchscreen driver
  *
  * Copyright (C) 2011 LGE, Inc.
+ * Copyright (C) 2015 TeamVee.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +71,7 @@ int mcs8000_ts_on(void);
 static void mcs8000_Data_Clear(void);
 static void ResetTS(void);
 
-#if defined (CONFIG_MACH_LGE)
+#ifdef CONFIG_MACH_LGE
 #define SUPPORT_TOUCH_KEY 1
 #else
 #define SUPPORT_TOUCH_KEY 0
@@ -991,19 +992,22 @@ static void mcs8000_work(struct work_struct *work)
 				keyID = (buf[i] & 0x0F);
 				touchState = (buf[i] & 0x80);
 
-				#if 1
-					printk(KERN_INFO "keyID    : [%d]\n", keyID);
-				#endif
+				printk(KERN_INFO "keyID : [%d]\n", keyID);
 
-#if defined(CONFIG_MACH_MSM7X25A_V3_DS) || defined(CONFIG_MACH_MSM7X25A_V1)
 				switch(keyID)
 				{
 					case 0x1:
 						input_report_key(ts->input_dev, KEY_BACK, touchState ? PRESS_KEY : RELEASE_KEY);
 						break;
+#ifdef CONFIG_MACH_MSM7X25A_V3_DS
 					case 0x2:
 						input_report_key(ts->input_dev, KEY_HOMEPAGE, touchState ? PRESS_KEY : RELEASE_KEY);
 						break;
+#else
+					case 0x2:
+						input_report_key(ts->input_dev, KEY_MENU, touchState ? PRESS_KEY : RELEASE_KEY);
+						break;
+#endif
 					case 0x3:
 						input_report_key(ts->input_dev, KEY_MENU, touchState ? PRESS_KEY : RELEASE_KEY);
 						break;
@@ -1013,12 +1017,6 @@ static void mcs8000_work(struct work_struct *work)
 					default:
 						break;					
 				}
-#else
-				if (keyID == 0x1)
-					input_report_key(ts->input_dev, KEY_BACK, touchState ? PRESS_KEY : RELEASE_KEY);
-				if (keyID == 0x2)
-					input_report_key(ts->input_dev, KEY_MENU, touchState ? PRESS_KEY : RELEASE_KEY);
-#endif
 			}
 		}
 
@@ -1051,25 +1049,21 @@ static void mcs8000_work(struct work_struct *work)
 					input_mt_sync(ts->input_dev);
 				}
 
-				#if 1
 				if(g_touchLogEnable)
 				{
 					printk(KERN_ERR "melfas_ts_work_func: Touch ID: %d, State : %d, x: %d, y: %d, z: %d w: %d\n", 
 							j, (g_Mtouch_info[j].strength>0), g_Mtouch_info[j].posX, g_Mtouch_info[j].posY, g_Mtouch_info[j].strength, g_Mtouch_info[j].width);
 				}
-				#endif
 
 				if(g_Mtouch_info[j].strength == 0){
 					g_Mtouch_info[j].strength = -1;
 				}
 			}
 
-			#if 1
 			if(g_touchLogEnable)
 			{
 				intensity_extract();
 			}
-			#endif	
 
 		}
 		input_sync(ts->input_dev);
@@ -1533,10 +1527,10 @@ static int __devinit mcs8000_ts_init(void)
 
 	mcs8000_ts_input->keybit[BIT_WORD(KEY_BACK)] |= BIT_MASK(KEY_BACK);
 	mcs8000_ts_input->keybit[BIT_WORD(KEY_MENU)] |= BIT_MASK(KEY_MENU);
-	#if defined(CONFIG_MACH_MSM7X25A_V3_DS) || defined(CONFIG_MACH_MSM7X25A_V1)
+#ifdef CONFIG_MACH_MSM7X25A_V3_DS
 	mcs8000_ts_input->keybit[BIT_WORD(KEY_HOMEPAGE)] |= BIT_MASK(KEY_HOMEPAGE);
+#endif
 	mcs8000_ts_input->keybit[BIT_WORD(KEY_SIM_SWITCH)] |= BIT_MASK(KEY_SIM_SWITCH);
-	#endif
 
 	err = input_register_device(mcs8000_ts_input);
 	if (err < 0) {
