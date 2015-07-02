@@ -24,13 +24,6 @@
 #define LGE_CRASH_LOG_SIZE              (SZ_1K)
 #endif
 
-
-
-#if 0
-#define PMEM_KERNEL_EBI1_SIZE	0x3A000
-#define MSM_PMEM_AUDIO_SIZE	0x5B000
-#endif
-
 #ifdef CONFIG_LGE_HW_REVISION
 /* board revision information */
 typedef  enum {
@@ -69,19 +62,14 @@ struct gpio_i2c_pin {
 	unsigned int irq_pin;
 };
 
-/*LGE_CHANGE_S : seven.kim@lge.com kernel3.0 porting
- * camera flash device/driver naming match
- */
- #if defined (CONFIG_LEDS_AS364X)
+#if defined (CONFIG_LEDS_AS364X)
 #define LEDS_CAMERA_FLASH_NAME	"as3647"
 #endif
-/*LGE_CHANGE_E : seven.kim@lge.com kernel3.0 porting*/
 
 #ifdef CONFIG_MMC_MSM_CARD_HW_DETECTION
 #define GPIO_SD_DETECT_N 40
 #endif
 
-/*LGE_CHANGE_S : seven.kim@lge.com for V7 */
 #if defined (CONFIG_MACH_MSM8X25_V7)
 #define SENSOR_GPIO_I2C_SCL		13
 #define SENSOR_GPIO_I2C_SDA		35
@@ -201,16 +189,13 @@ struct gpio_i2c_pin {
 #if defined (CONFIG_MACH_MSM8X25_V7)
 #define RGB_GPIO_I2C_SCL		57
 #define RGB_GPIO_I2C_SDA		58
-#elif defined(CONFIG_MACH_MSM7X25A_V3_EU)
-/*[2012-12-08][junghoon79.kim@lge.com] k-prj i2c change to 57,58 since rev_1.1 [START]*/
-#ifdef CONFIG_MACH_MSM7X25A_V3EU_REV_11
+#elif defined(CONFIG_MACH_MSM7X25A_V3BR_REV_11)
 #define RGB_GPIO_I2C_SCL		57
 #define RGB_GPIO_I2C_SDA		58
 #else
 #define RGB_GPIO_I2C_SCL		77
 #define RGB_GPIO_I2C_SDA		80
-#endif//ifdef CONFIG_MACH_MSM7X25A_V3EU_REV_11
-/*[2012-12-08][junghoon79.kim@lge.com] k-prj i2c change to 57,58 since rev_1.1 [END]*/
+#endif
 #endif
 #define RGB_GPIO_RGB_EN 		115
 #define RGB_I2C_ADDRESS			0x32

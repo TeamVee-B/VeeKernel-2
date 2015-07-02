@@ -214,7 +214,7 @@ static struct proccomm_regulator_info msm7x27a_pcom_vreg_info[] = {
 	 * V = automatic voltage set (meaningful for single-voltage regs only)
 	 * S = supply voltage (uV)
 	 * T = type of regulator (smps, pldo, nldo)
-	 *            name   id  supp  min uV    max uV  R   P  A  B  V  S  T*/
+	 *            name   id  supp   min uV    max uV   R   P  A  B  V  S  T*/
 	PCOM_VREG_SMP(smps1,  3, NULL,  1100000,  1100000, 0, -1, 0, 0, 0, 0, s),	// msmc1
 	PCOM_VREG_SMP(smps2,  4, NULL,  1100000,  1100000, 0, -1, 0, 0, 0, 0, s),	// msmc2
 	PCOM_VREG_SMP(smps3,  2, NULL,  1800000,  1800000, 0, -1, 0, 0, 0, 0, s),	// msme1, emmc

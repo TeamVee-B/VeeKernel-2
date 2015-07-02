@@ -497,8 +497,7 @@ static struct platform_device msm_adc_device = {
 	},
 };
 
-#if defined(CONFIG_SERIAL_MSM_HSL_CONSOLE) \
-		&& defined(CONFIG_MSM_SHARED_GPIO_FOR_UART2DM)
+#if defined(CONFIG_SERIAL_MSM_HSL_CONSOLE) && defined(CONFIG_MSM_SHARED_GPIO_FOR_UART2DM)
 static struct msm_gpio uart2dm_gpios[] = {
 	{GPIO_CFG(19, 2, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),
 							"uart2dm_rfr_n" },
@@ -943,9 +942,9 @@ static void __init msm7x2x_init(void)
 #ifdef CONFIG_LGE_BOOT_MODE
 	lge_add_boot_mode_devices();
 #endif
-	#if defined(CONFIG_ANDROID_RAM_CONSOLE) && defined(CONFIG_LGE_HANDLE_PANIC)
+#if defined(CONFIG_ANDROID_RAM_CONSOLE) && defined(CONFIG_LGE_HANDLE_PANIC)
 	lge_add_panic_handler_devices();
-	#endif
+#endif
 	lge_add_pm_devices();
 }
 
