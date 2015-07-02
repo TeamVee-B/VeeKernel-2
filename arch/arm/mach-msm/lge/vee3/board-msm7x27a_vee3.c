@@ -159,10 +159,8 @@ static struct msm_i2c_platform_data msm_gsbi1_qup_i2c_pdata = {
 };
 
 #ifdef CONFIG_ARCH_MSM7X27A
-
-#define MSM_RESERVE_MDP_SIZE		0x900000
+#define MSM_RESERVE_MDP_SIZE		0xC00000
 #define MSM7x25A_MSM_RESERVE_MDP_SIZE	0x1500000
-
 #define MSM_RESERVE_ADSP_SIZE		0x1200000
 #define MSM7x25A_MSM_RESERVE_ADSP_SIZE	0xB91000
 #define CAMERA_ZSL_SIZE			(SZ_1M * 60)
@@ -959,7 +957,7 @@ static void __init msm7x2x_init_early(void)
 #endif
 }
 
-MACHINE_START(MSM7X25A_V3, "LG MSM7225AB")
+MACHINE_START(MSM7X25A_V3, "MSM7225A v3")
 	.atag_offset	= 0x100,
 	.map_io		= msm_common_io_init,
 	.reserve	= msm7x27a_reserve,
