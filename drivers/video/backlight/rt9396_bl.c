@@ -1,5 +1,7 @@
 /* drivers/video/backlight/rt9396_bl.c
  *
+ * Copyright (C) 2015 TeamVee.
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -25,17 +27,11 @@
 #include <linux/delay.h>
 #include <linux/gpio.h>
 #include CONFIG_LGE_BOARD_HEADER_FILE
+#include <linux/leds.h>
 
 #include <mach/lge/lge_proc_comm.h>
 
 #define MODULE_NAME  "rt9396bl"
-#define CONFIG_BACKLIGHT_LEDS_CLASS
-
-#define USE_BUTTON_BACKLIGHT
-
-#ifdef CONFIG_BACKLIGHT_LEDS_CLASS
-#include <linux/leds.h>
-#endif
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 #include <linux/earlysuspend.h>
@@ -48,7 +44,6 @@
 
 #define RT9396_LDO_NUM	4
 
-#if 1
 #define HAL_MAX_VALUE	255
 #define HAL_80PER_VALUE	208
 #define HAL_60PER_VALUE	159
@@ -59,33 +54,18 @@
 #define RT9396BL_MIN_BRIGHTNESS		0x04
 #define RT9396BL_20PER_BRIGHTNESS	0x06	//2.73mA
 #define RT9396BL_40PER_BRIGHTNESS	0x0c	//5.08mA
-#define RT9396BL_60PER_BRIGHTNESS	0x16	//0x17 - 9.38mA
-#define RT9396BL_80PER_BRIGHTNESS	0x26	//0x28 - 16.02mA
-#define RT9396BL_MAX_BRIGHTNESS 	0x3f	//25mA
-
-#define RT9396BL_DEFAULT_BRIGHTNESS	0x14	//for 8.2mA(V3 UI bar 58%)
-
-#else
-#define MAX_VALUE			255
-#define DEFAULT_VALUE			255
-#define MIN_VALUE			25
-
-#define RT9396BL_MIN_BRIGHTNESS		0x05 
-#define RT9396BL_DEFAULT_BRIGHTNESS	0x1b	//for 10.16mA
-#define RT9396BL_MAX_BRIGHTNESS		0x3f
-#endif
+#define RT9396BL_60PER_BRIGHTNESS	0x16
+#define RT9396BL_80PER_BRIGHTNESS	0x26
+#define RT9396BL_MAX_BRIGHTNESS		0x3f	//25mA
+#define RT9396BL_DEFAULT_BRIGHTNESS	0x14
 
 //register
 #define RT9396BL_REG_CURRENT		0x47	/* Register address to control Backlight Level */
-#ifdef USE_BUTTON_BACKLIGHT
 #define RT9396BL_REG_LED_ON		0x83	/* Register address for LED1 ~ LED4 on seting */
 #define RT9396BL_REG_LED_OFF		0x80	/* Register address for LED1 ~ LED4 off seting */
-#define RT9396BL_REG_KEYLED_ON		0x93	/* Register address for LED5 ~ LED6 on seting */
-#define RT9396BL_REG_KEYLED_OFF		0x90	/* Register address for LED5 ~ LED6 off seting */
-#else
-#define RT9396BL_REG_LED_ON		0x4F	/* Register address for LED1 ~ LED6 on seting */
-#define RT9396BL_REG_LED_OFF		0x40	/* Register address for LED1 ~ LED6 on seting */
-#endif 
+/* [Caio99BR][caiooliveirafarias0@gmail.com] Workaround for bug of screen still awake after lock */
+//#define RT9396BL_REG_KEYLED_ON		0x93	/* Register address for LED5 ~ LED6 on seting */
+//#define RT9396BL_REG_KEYLED_OFF		0x90	/* Register address for LED5 ~ LED6 off seting */
 
 //LDO ON
 #define RT9396BL_REG_LDO1_ON	0x23	/* Register address for LDO 1 voltage setting */
@@ -105,21 +85,15 @@
 #define RT9396BL_VAL_LDO4	0x04	/* value for LDO 4 voltage setting */
 #define RT9396BL_VAL_LED_SET	0x34
 
-#ifdef USE_BUTTON_BACKLIGHT
-
-#if defined(CONFIG_LEDS_LP5521) && defined(CONFIG_MACH_MSM7X25A_V3_EU)
+/* [Caio99BR][caiooliveirafarias0@gmail.com] Workaround for bug of screen still awake after lock
+#ifdef CONFIG_LEDS_LP5521
 #define RT9396BL_VAL_KEYLED_SET	0x05 // 2.34mA
 #else
 #define RT9396BL_VAL_KEYLED_SET	0x04 //1.95mA
-#endif
-#endif
+#endif */
 
-#ifdef CONFIG_BACKLIGHT_LEDS_CLASS
-#define LEDS_BACKLIGHT_NAME	"lcd-backlight"
-#ifdef USE_BUTTON_BACKLIGHT
+#define LEDS_BACKLIGHT_NAME		"lcd-backlight"
 #define BUTTON_LEDS_BACKLIGHT_NAME	"button-backlight"
-#endif 
-#endif
 
 enum {
 	ALC_MODE,
@@ -190,18 +164,19 @@ static int rt9396_powerstate = POWERON_STATE;
 /* Set to initial mode */
 static struct rt9396_ctrl_tbl rt9396bl_inital_tbl[] = {
 	{ RT9396BL_REG_LED_ON, RT9396BL_VAL_LED_SET },
-	#if defined( CONFIG_MACH_MSM7X25A_V3EU_REV_11) || defined( CONFIG_MACH_MSM7X25A_V3BR_REV_11)
+/* [Caio99BR][caiooliveirafarias0@gmail.com] Workaround for bug of screen still awake after lock
+#ifdef CONFIG_MACH_MSM7X25A_V3_DS
 	{ RT9396BL_REG_KEYLED_OFF, 0x00 },
-	#else
+#else
 	{ RT9396BL_REG_KEYLED_ON, RT9396BL_VAL_KEYLED_SET },
-	#endif
+#endif */
 	{ 0xFF, 0xFE }
 };
 
 /* Set to sleep mode  */
 static struct rt9396_ctrl_tbl rt9396bl_sleep_tbl[] = {
 	{ RT9396BL_REG_LED_OFF, 0x00 },
-	{ RT9396BL_REG_KEYLED_OFF, 0x00 },
+//	{ RT9396BL_REG_KEYLED_OFF, 0x00 },
 	{ 0xFF, 0xFE }
 };
 static int bl_chargerlogo = 0;
@@ -416,7 +391,7 @@ static void rt9396_sleep(struct rt9396_driver_data *drvdata)
 	if (!drvdata || drvdata->state == SLEEP_STATE)
 		return;	
 
-printk("[rt9396_sleep] pre intensity:%d !!!!!\n", drvdata->intensity);
+printk("[rt9396_sleep] pre intensity:%d !\n", drvdata->intensity);
 	switch (drvdata->mode) {
 		case NORMAL_MODE:
 			drvdata->state = SLEEP_STATE;
@@ -441,7 +416,7 @@ static void rt9396_wakeup(struct rt9396_driver_data *drvdata)
 	if (!drvdata || drvdata->state == NORMAL_STATE)
 		return;
 
-   printk("[rt9396_wakeup] pre intensity:%d !!!!!\n", drvdata->intensity);
+   printk("[rt9396_wakeup] pre intensity:%d !\n", drvdata->intensity);
 	if(rt9396_powerstate == SLEEP_STATE){
 			rt9396_powerstate = NORMAL_STATE;
 	}
@@ -465,10 +440,8 @@ int rt9396_get_state(void)
     return rt9396_powerstate;
 }
 
-#if 1
 extern int display_on; 
 int Is_Backlight_Set = 0;
-#endif
 
 static int rt9396_send_intensity(struct rt9396_driver_data *drvdata, int next)
 {
@@ -479,25 +452,26 @@ static int rt9396_send_intensity(struct rt9396_driver_data *drvdata, int next)
 
    if ((drvdata->intensity != next) && (next != 0))
    {
-		rt9396_write(drvdata->client, drvdata->reg_addrs.led_set_on, next);
-      printk("[%s] LCD-backlight ON ! val:%d \n", __func__,next);
-      Is_Backlight_Set = 1;
+	rt9396_write(drvdata->client, drvdata->reg_addrs.led_set_on, next);
+	// printk("[%s] LCD-backlight ON ! val:%d \n", __func__,next);
+	Is_Backlight_Set = 1;
 	}
    else if(next ==0)
    {
-      printk("[%s] LCD-backlight OFF !\n", __func__);
-      rt9396_write(drvdata->client, drvdata->reg_addrs.led_set_off, next);
-      Is_Backlight_Set = 0;
+	rt9396_write(drvdata->client, drvdata->reg_addrs.led_set_off, next);
+	// printk("[%s] LCD-backlight OFF !\n", __func__);
+	Is_Backlight_Set = 0;
    }
 	drvdata->intensity = next;
 	return 0;
 
 }
 
-#ifdef USE_BUTTON_BACKLIGHT
+
 int rt9396_send_intensity_button(struct rt9396_driver_data *drvdata, int level)
 {
-	#if !defined( CONFIG_MACH_MSM7X25A_V3EU_REV_11) && !defined( CONFIG_MACH_MSM7X25A_V3BR_REV_11)
+/* [Caio99BR][caiooliveirafarias0@gmail.com] Workaround for bug of screen still awake after lock
+#ifndef CONFIG_MACH_MSM7X25A_V3_DS
 	if(level)
 	{
 	printk("[%s] key-backlight ON ! \n", __func__);
@@ -507,11 +481,10 @@ int rt9396_send_intensity_button(struct rt9396_driver_data *drvdata, int level)
 	{
 	printk("[%s] key-backlight OFF !\n", __func__);
 	rt9396_write(drvdata->client, RT9396BL_REG_KEYLED_OFF, RT9396BL_VAL_KEYLED_SET);
-	}  
-	#endif
+	}
+#endif */
 	return 0;
 }
-#endif
 
 static int rt9396_get_intensity(struct rt9396_driver_data *drvdata)
 {
@@ -568,7 +541,7 @@ void rt9396_switch_mode(struct device *dev, int next_mode)
 	}
 	else if (next_mode == NORMAL_MODE) {		
 	} else {
-		printk(KERN_ERR "%s: invalid mode(%d)!!!\n", __func__, next_mode);
+		printk(KERN_ERR "%s: invalid mode(%d)!\n", __func__, next_mode);
 		return;
 	}
 
@@ -637,9 +610,9 @@ ssize_t rt9396_show_drvstat(struct device *dev, struct device_attribute *attr, c
 	int len = 0;
 
 	len += snprintf(buf,  PAGE_SIZE,     "\nrt9396 Backlight Driver Status is following..\n");
-	len += snprintf(buf + len, PAGE_SIZE - len, "mode                   = %3d\n", drvdata->mode);
-	len += snprintf(buf + len, PAGE_SIZE - len, "state                  = %3d\n", drvdata->state);
-	len += snprintf(buf + len, PAGE_SIZE - len, "current intensity      = %3d\n", drvdata->intensity);
+	len += snprintf(buf + len, PAGE_SIZE - len, "mode              = %3d\n", drvdata->mode);
+	len += snprintf(buf + len, PAGE_SIZE - len, "state             = %3d\n", drvdata->state);
+	len += snprintf(buf + len, PAGE_SIZE - len, "current intensity = %3d\n", drvdata->intensity);
 
 	return len;
 }
@@ -679,8 +652,6 @@ static struct backlight_ops rt9396_ops = {
 	.update_status  = rt9396_set_brightness,
 };
 
-
-#ifdef CONFIG_BACKLIGHT_LEDS_CLASS
 static void leds_brightness_set(struct led_classdev *led_cdev, enum led_brightness value)
 {
 	struct rt9396_driver_data *drvdata = dev_get_drvdata(led_cdev->dev->parent);
@@ -692,18 +663,17 @@ static void leds_brightness_set(struct led_classdev *led_cdev, enum led_brightne
 		return;
 	}
 
-	brightness = rt9396_get_intensity(drvdata);	
-   #if 1   
-   if(!value)
-      next = value;
-   else if(value !=0 && value < HAL_MIN_VALUE)
-      value = HAL_MIN_VALUE;
-   
-   if(value == HAL_MIN_VALUE)
-   {      
-      next = RT9396BL_MIN_BRIGHTNESS;
-   }
-   else if(value > HAL_MIN_VALUE && value <= HAL_20PER_VALUE)
+	brightness = rt9396_get_intensity(drvdata);
+	if(!value)
+		next = value;
+	else if(value !=0 && value < HAL_MIN_VALUE)
+		value = HAL_MIN_VALUE;
+
+	if(value == HAL_MIN_VALUE)
+	{
+		next = RT9396BL_MIN_BRIGHTNESS;
+	}
+	else if(value > HAL_MIN_VALUE && value <= HAL_20PER_VALUE)
 	{				
 		next = RT9396BL_MIN_BRIGHTNESS + (RT9396BL_20PER_BRIGHTNESS - RT9396BL_MIN_BRIGHTNESS)
 			*(value-HAL_MIN_VALUE)/( HAL_20PER_VALUE - HAL_MIN_VALUE);
@@ -713,12 +683,12 @@ static void leds_brightness_set(struct led_classdev *led_cdev, enum led_brightne
 		next = RT9396BL_20PER_BRIGHTNESS + (RT9396BL_40PER_BRIGHTNESS - RT9396BL_20PER_BRIGHTNESS)
 			*(value-HAL_20PER_VALUE)/( HAL_40PER_VALUE - HAL_20PER_VALUE);
 	}
-   else if(value > HAL_40PER_VALUE && value <= HAL_60PER_VALUE)
+	else if(value > HAL_40PER_VALUE && value <= HAL_60PER_VALUE)
 	{
 		next = RT9396BL_40PER_BRIGHTNESS + (RT9396BL_60PER_BRIGHTNESS - RT9396BL_40PER_BRIGHTNESS)
 			*(value-HAL_40PER_VALUE)/( HAL_60PER_VALUE - HAL_40PER_VALUE);
 	}
-   else if(value > HAL_60PER_VALUE && value <= HAL_80PER_VALUE)
+	else if(value > HAL_60PER_VALUE && value <= HAL_80PER_VALUE)
 	{
 		next = RT9396BL_60PER_BRIGHTNESS + (RT9396BL_80PER_BRIGHTNESS - RT9396BL_60PER_BRIGHTNESS)
 			*(value-HAL_60PER_VALUE)/( HAL_80PER_VALUE - HAL_60PER_VALUE);
@@ -726,46 +696,19 @@ static void leds_brightness_set(struct led_classdev *led_cdev, enum led_brightne
 	else if(value > HAL_80PER_VALUE)
 	{
 		if(value > HAL_MAX_VALUE)
-		{			
+		{
 			value = HAL_MAX_VALUE;
 		}
-      if(value == HAL_MAX_VALUE)
-      {
-         next = RT9396BL_MAX_BRIGHTNESS;
-      }
-      else
-      {
-         next = RT9396BL_80PER_BRIGHTNESS + (RT9396BL_MAX_BRIGHTNESS - RT9396BL_80PER_BRIGHTNESS)
+	if(value == HAL_MAX_VALUE)
+	{
+		next = RT9396BL_MAX_BRIGHTNESS;
+	}
+	else
+	{
+		next = RT9396BL_80PER_BRIGHTNESS + (RT9396BL_MAX_BRIGHTNESS - RT9396BL_80PER_BRIGHTNESS)
 			*(value-HAL_80PER_VALUE)/( HAL_MAX_VALUE - HAL_80PER_VALUE);
-      }		
 	}
-   #else
-	if(value < MIN_VALUE)
-	{
-		if(value<0)
-		{
-			printk("%s, old value: %d\n", __func__,value );
-			value=0;
-		}			
-		next = value*RT9396BL_MIN_BRIGHTNESS/MIN_VALUE;
 	}
-	else if(value >= MIN_VALUE && value <= DEFAULT_VALUE)
-
-	{
-		next = RT9396BL_MIN_BRIGHTNESS + (RT9396BL_DEFAULT_BRIGHTNESS - RT9396BL_MIN_BRIGHTNESS)
-			*(value-MIN_VALUE)/( DEFAULT_VALUE - MIN_VALUE);
-	}
-	else if(value >DEFAULT_VALUE)
-	{
-		if(value>MAX_VALUE)
-		{
-			printk("%s, old value: %d\n", __func__,value );
-			value=MAX_VALUE;
-		}
-		next = RT9396BL_DEFAULT_BRIGHTNESS + (RT9396BL_MAX_BRIGHTNESS  - RT9396BL_DEFAULT_BRIGHTNESS)
-			*(value-DEFAULT_VALUE)/(MAX_VALUE - DEFAULT_VALUE);
-	}
-   #endif	
 	if (brightness != next) {
 		rt9396_send_intensity(drvdata, next);
 	}
@@ -776,13 +719,14 @@ static struct led_classdev rt9396_led_dev = {
 	.brightness_set = leds_brightness_set,
 };
 
-#ifdef USE_BUTTON_BACKLIGHT
+/* [Caio99BR][caiooliveirafarias0@gmail.com] Workaround for bug of screen still awake after lock
+#ifndef CONFIG_MACH_MSM7X25A_V3_DS
 static void button_leds_brightness_set(struct led_classdev *led_cdev, enum led_brightness value)
 {
 	struct rt9396_driver_data *drvdata = dev_get_drvdata(led_cdev->dev->parent);
 
 	if (!drvdata) {
-		eprintk("Error getting drvier data\n");
+		eprintk("Error getting driver data\n");
 		return;
 	}
 	rt9396_send_intensity_button(drvdata, value);
@@ -793,8 +737,7 @@ static struct led_classdev rt9396_keyled_dev = {
 	.brightness_set = button_leds_brightness_set,
 	.brightness		= LED_OFF,
 };
-#endif
-#endif
+#endif */
 
 static int rt9396_probe(struct i2c_client *i2c_dev, const struct i2c_device_id *i2c_dev_id)
 {
@@ -835,14 +778,13 @@ static int rt9396_probe(struct i2c_client *i2c_dev, const struct i2c_device_id *
 		return -ENODEV;
 	}
 
-#if 1
 	if (drvdata->gpio && gpio_request(drvdata->gpio, "rt9396_en") != 0) {
 		eprintk("Error while requesting gpio %d\n", drvdata->gpio);
 		kfree(drvdata);
 		return -ENODEV;
 	}
 	gpio_tlmm_config(GPIO_CFG(drvdata->gpio, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
-#endif
+
 	bd = backlight_device_register("rt9396-bl", &i2c_dev->dev, NULL, &rt9396_ops, NULL);
 	if (bd == NULL) {
 		eprintk("entering rt9396 probe function error \n");
@@ -854,7 +796,6 @@ static int rt9396_probe(struct i2c_client *i2c_dev, const struct i2c_device_id *
 	bd->props.max_brightness = drvdata->max_intensity;
 	drvdata->bd = bd;
 
-#ifdef CONFIG_BACKLIGHT_LEDS_CLASS
 	if (led_classdev_register(&i2c_dev->dev, &rt9396_led_dev) == 0) {
 		eprintk("Registering led class dev successfully.\n");
 		drvdata->led = &rt9396_led_dev;
@@ -863,13 +804,13 @@ static int rt9396_probe(struct i2c_client *i2c_dev, const struct i2c_device_id *
 		err = device_create_file(drvdata->led->dev, &dev_attr_drvstat);
 		err = device_create_file(drvdata->led->dev, &dev_attr_chargerlogo);
 	}
-#ifdef USE_BUTTON_BACKLIGHT
+/* [Caio99BR][caiooliveirafarias0@gmail.com] Workaround for bug of screen still awake after lock
+#ifndef CONFIG_MACH_MSM7X25A_V3_DS
 	if (led_classdev_register(&i2c_dev->dev, &rt9396_keyled_dev) == 0) {
 		eprintk("Registering led class dev successfully.\n");
 		drvdata->led = &rt9396_keyled_dev;
 	}
-#endif
-#endif
+#endif */
 
 	i2c_set_clientdata(i2c_dev, drvdata);
 	i2c_set_adapdata(i2c_dev->adapter, i2c_dev);
