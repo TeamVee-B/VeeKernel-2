@@ -142,7 +142,6 @@ esac
 # Menu - Start
 
 customkernel=VeeKernel
-version=Stable
 
 buildsh() {
 kernelversion=`cat Makefile | grep VERSION | cut -c 11- | head -1`
@@ -199,7 +198,7 @@ case $x in
 		echo "$x - Building Kernel..."; buildprocess; buildsh
 	fi;;
 	6) if [ -f arch/arm/boot/zImage ]; then
-		echo "$x - Ziping Kernel..."; zippackage; buildsh
+		echo "$x - Ziping Kernel..."; version=`cat .version`; zippackage; buildsh
 	fi;;
 	7) if [ -f zip-creator/*.zip ]; then
 		echo "$x - Coping Kernel..."; adbcopy; buildsh
