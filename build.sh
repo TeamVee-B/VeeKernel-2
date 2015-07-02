@@ -96,7 +96,7 @@ fi
 cp arch/arm/boot/zImage zip-creator
 find . -name *.ko | xargs cp -a --target-directory=zip-creator/system/lib/modules/ &> /dev/null
 
-zipfile="$customkernel-$target$serie$variant-$version.zip"
+zipfile="$customkernel-$target$serie$variant.zip"
 
 cd zip-creator
 zip -r $zipfile * -x */.gitignore* &> /dev/null
@@ -198,7 +198,7 @@ case $x in
 		echo "$x - Building Kernel..."; buildprocess; buildsh
 	fi;;
 	6) if [ -f arch/arm/boot/zImage ]; then
-		echo "$x - Ziping Kernel..."; version=`cat .version`; zippackage; buildsh
+		echo "$x - Ziping Kernel..."; zippackage; buildsh
 	fi;;
 	7) if [ -f zip-creator/*.zip ]; then
 		echo "$x - Coping Kernel..."; adbcopy; buildsh
